@@ -39,6 +39,7 @@ class Instructions0Params(Instructions):
         STORE = "store"
         POP = "pop"
         PRINT = "print"
+        NEW = "new"
 
     def __init__(self, instruction: I):
         self.instruction = instruction
@@ -88,6 +89,12 @@ class Instructions0Params(Instructions):
             S.SP -= 1
         elif self.instruction == Instructions0Params.I.POP:
             S.SP -= 1
+        elif self.instruction == Instructions0Params.I.NEW:
+            if (S.NP - S[S.SP] <= S.EP):
+                S[S.SP] = 0
+            else:
+                S.NP -= S[S.SP]
+                S[S.SP] = S.NP
         else:
             raise Exception("Unknown instruction")
 

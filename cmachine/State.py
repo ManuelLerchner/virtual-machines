@@ -12,6 +12,8 @@ class Stack:
     def __init__(self):
         self.stack: dict[int, int] = defaultdict(lambda: "_")
         self.SP: int = -1
+        self.NP = 10000
+        self.EP = 5000
 
     def __getitem__(self, key: int) -> int:
         return self.stack[key]
