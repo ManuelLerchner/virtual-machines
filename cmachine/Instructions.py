@@ -4,7 +4,23 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from State import State
+    from cmachine.Interpreter import Interpreter
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    OKYELLOW = '\033[93m'
+    OKRED = '\033[91m'
+    OKMAGENTA = '\033[95m'
+    OKORANGE = '\033[33m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
 class Instructions:
@@ -17,37 +33,41 @@ class Instructions:
         pass
 
     @abstractmethod
-    def interpret(self, state: State):
+    def interpret(self, state: Interpreter):
         pass
 
 
 class Instructions0Params(Instructions):
 
     class I(Enum):
-        ADD = "add"
-        SUB = "sub"
-        MUL = "mul"
-        DIV = "div"
-        LEQ = "leq"
-        GEQ = "geq"
-        LT = "lt"
-        GT = "gt"
-        EQ = "eq"
-        NEG = "neg"
-        NOT = "not"
+        ADD = "+"
+        SUB = "-"
+        MUL = "*"
+        DIV = "/"
+        LEQ = "<="
+        GEQ = ">="
+        LT = "<"
+        GT = ">"
+        EQ = "=="
+        NEG = "-"
+        NOT = "!"
         LOAD = "load"
         STORE = "store"
         POP = "pop"
         PRINT = "print"
         NEW = "new"
+        MARK = "mark"
+        CALL = "call"
+        RETURN = "return"
+        HALT = "halt"
 
     def __init__(self, instruction: I):
         self.instruction = instruction
 
     def __repr__(self):
-        return f"{self.instruction.value}"
+        return f"{bcolors.WARNING+self.instruction.value+bcolors.ENDC}"
 
-    def interpret(self, state: State):
+    def interpret(self, state: Interpreter):
         S = state.stack
         if self.instruction == Instructions0Params.I.ADD:
             S.SP -= 1
@@ -81,7 +101,7 @@ class Instructions0Params(Instructions):
         elif self.instruction == Instructions0Params.I.NOT:
             S[S.SP] = 1 if S[S.SP] == 0 else 0
         elif self.instruction == Instructions0Params.I.PRINT:
-            print(S[S.SP])
+            print(">>", S[S.SP])
         elif self.instruction == Instructions0Params.I.LOAD:
             S[S.SP] = S[S[S.SP]]
         elif self.instruction == Instructions0Params.I.STORE:
@@ -95,6 +115,24 @@ class Instructions0Params(Instructions):
             else:
                 S.NP -= S[S.SP]
                 S[S.SP] = S.NP
+        elif self.instruction == Instructions0Params.I.MARK:
+            S[S.SP+1] = S.EP
+            S[S.SP+2] = S.FP
+            S.SP += 2
+        elif self.instruction == Instructions0Params.I.CALL:
+            tmp = S[S.SP]
+            S[S.SP] = state.PC
+            S.FP = S.SP
+            state.PC = tmp
+        elif self.instruction == Instructions0Params.I.RETURN:
+            state.PC = S[S.FP]
+            S.EP = S[S.FP-2]
+            if (S.EP >= S.NP):
+                raise Exception("Stack overflow")
+            S.SP = S.FP-3
+            S.FP = S[S.SP+2]
+        elif self.instruction == Instructions0Params.I.HALT:
+            state.PC = len(state.code)
         else:
             raise Exception("Unknown instruction")
 
@@ -103,32 +141,50 @@ class Instructions1Params(Instructions):
 
     class I(Enum):
         LOADC = "LOADC"
+        LOADRC = "LOADRC"
         JUMP = "JUMP"
         JUMPZ = "JUMPZ"
         JUMP_TARGET = "JUMP_TARGET"
         ALLOC = "ALLOC"
+        ENTER = "ENTER"
+        SLIDE = "SLIDE"
 
     def __init__(self, instruction: I, param1):
         self.instruction = instruction
         self.param1 = param1
 
     def __repr__(self):
-        return f"{self.instruction.value} {self.param1}"
+        return f"{bcolors.OKCYAN+self.instruction.value+bcolors.ENDC} {bcolors.OKGREEN+str(self.param1)+bcolors.ENDC}"
 
-    def interpret(self, state: State):
+    def interpret(self, state: Interpreter):
         S = state.stack
+
+        if (type(self.param1) == str):
+            self.param1 = state.jumpLabels[self.param1]
+
         if self.instruction == Instructions1Params.I.LOADC:
             S.SP += 1
             S[S.SP] = self.param1
+        elif self.instruction == Instructions1Params.I.LOADRC:
+            S.SP += 1
+            S[S.SP] = S.FP + self.param1
         elif self.instruction == Instructions1Params.I.JUMP:
-            state.PC = state.jumpLabels[self.param1]
+            state.PC = self.param1
         elif self.instruction == Instructions1Params.I.JUMPZ:
             if S[S.SP] == 0:
-                state.PC = state.jumpLabels[self.param1]
+                state.PC = self.param1
             S.SP -= 1
         elif self.instruction == Instructions1Params.I.JUMP_TARGET:
             pass
         elif self.instruction == Instructions1Params.I.ALLOC:
             S.SP += self.param1
+        elif self.instruction == Instructions1Params.I.ENTER:
+            S.EP = S.SP + self.param1
+            if S.EP >= S.NP:
+                raise Exception("Stack overflow")
+        elif self.instruction == Instructions1Params.I.SLIDE:
+            tmp = S[S.SP]
+            S.SP -= self.param1
+            S[S.SP] = tmp
         else:
             raise Exception("Unknown instruction")

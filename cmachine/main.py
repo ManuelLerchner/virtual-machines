@@ -1,57 +1,77 @@
-from Nodes import BinaryOperation, UnaryOperator, Assignment, Variable, Number, StatementSequence, Comma, If, IfElse, Print, While, For, DeclareVariable, ArrayAccess, Dereference, AddressOf, DeclareStruct, StructAccess, Malloc
-from Instructions import Instructions
+from Nodes import *
 from Instructions import Instructions0Params as I0P, Instructions1Params as I1P
-from State import State
+from Interpreter import Interpreter
 
 
 if __name__ == '__main__':
 
-    expr = StatementSequence(
-        DeclareVariable("int*", 1, 1, "a",
-                        StatementSequence(
-                            Assignment(Variable("a"), Malloc(Number(10))),
-                            DeclareVariable("int", 1, 1, "i",
-                                            StatementSequence(
-                                                For(
-                                                    Assignment(
-                                                        Variable("i"), Number(0)),
-                                                    BinaryOperation(
-                                                        Variable("i"), I0P.I.LEQ, Number(9)),
-                                                    Assignment(Variable("i"),
-                                                               BinaryOperation(
-                                                        Variable("i"), I0P.I.ADD, Number(1))),
-                                                    StatementSequence(
-                                                        Assignment(
-                                                            ArrayAccess(
-                                                                Variable("a"), Variable("i")),
-                                                            Variable("i")),
+    expr = Program([
+        DeclareVariable("int", 1, 1, "out", StatementSequence())
+    ], [
+        FunctionDefinition("int", "fib", [
+            DeclareVariable("int", 1, 1, "n", StatementSequence())
+        ],
+            IfElse(
+            BinaryOperation(
+                Variable("int", "n"), I0P.I.LEQ, Number(1)),
+            Return(Variable("int", "n")),
+            Return(BinaryOperation(
+                FunctionCall(Variable("*fac(int)", "fib"), [BinaryOperation(
+                    Variable("int", "n"), I0P.I.SUB, Number(1))]),
+                I0P.I.ADD,
+                FunctionCall(Variable("*fac(int)", "fib"), [BinaryOperation(
+                    Variable("int", "n"), I0P.I.SUB, Number(2))])
+            ))
+        )
+        ),
+        FunctionDefinition("int", "fac", [
+            DeclareVariable("int", 1, 1, "x", StatementSequence())
+        ],
+            IfElse(
+            BinaryOperation(
+                Variable("int", "x"), I0P.I.LEQ, Number(0)),
+            Return(Number(1)),
+            Return(BinaryOperation(
+                Variable("int", "x"),
+                I0P.I.MUL,
+                FunctionCall(Variable("*fac(int)", "fac"), [BinaryOperation(
+                    Variable("int", "x"), I0P.I.SUB, Number(1))])
+            ))
+        )
+        ),
 
+        FunctionDefinition("int", "main", [],
 
+                           StatementSequence(
+                               Assignment(Variable("int", "out"),
+                                          FunctionCall(Variable("*fac(int)", "fib"), [Number(16)])),
+            Print(Variable("int", "out")),
+            Assignment(Variable("int", "out"),
+                                   BinaryOperation(
+                Variable("int", "out"),
+                I0P.I.ADD,
+                FunctionCall(
+                    Variable("*fac(int)", "fac"), [Number(16)])
+            )),
+            Print(Variable("int", "out")),
+                               Return(Variable("int", "out"))
+        )
+        )
 
-                                                    )),
-                                                Print(ArrayAccess(
-                                                    Variable("a"), Number(5))),
-                                                DeclareVariable("int*", 1, 1, "b",
-                                                                StatementSequence(
-                                                                    Assignment(
-                                                                        Variable("b"), AddressOf(ArrayAccess(Variable("a"), Number(6)))),
-                                                                    Print(Dereference(
-                                                                        Variable("b"))),
+    ])
 
-                                                                )
-                                                                ))
-                                            ))))
+    variable_adress: dict[str, (chr, int)] = {}
 
-    variable_adress: dict[str, int] = {}
-    variable_values: dict[str, int] = {}
+    print(expr, "\n")
 
     code = expr.code(variable_adress, 0)
 
-    s = State(code)
+    print(f"Code: [{len(code)} instructions]\n{code}\n")
 
-    s.stack.initVariables(variable_adress, variable_values)
+    s = Interpreter(code)
 
-    print(expr, "\n")
-    print(code, "\n")
+    print("Running...\n")
 
     s.run(debug=False)
+
+    print("Exit code: ", s.stack.stack[0], "\n")

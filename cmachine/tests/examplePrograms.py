@@ -1,7 +1,7 @@
-from Nodes import BinaryOperation, UnaryOperator, Assignment, Variable, Number, StatementSequence, Comma, If, IfElse, Print, While, For, DeclareVariable, ArrayAccess, Dereference, AddressOf, DeclareStruct, StructAccess, Malloc
+from Nodes import Arrow, BinaryOperation, FunctionCall, FunctionDefinition, Program, Return, UnaryOperator, Assignment, Variable, Number, StatementSequence, Comma, If, IfElse, Print, While, For, DeclareVariable, ArrayAccess, Dereference, AddressOf, DeclareStruct, StructAccess, Malloc
 from Instructions import Instructions
 from Instructions import Instructions0Params as I0P, Instructions1Params as I1P
-from State import State
+from cmachine.Interpreter import Interpreter
 from ASTNode import AdressEntry
 
 # int[4] x;
@@ -64,43 +64,56 @@ dot_product_example = DeclareVariable("int", 1, 4, "x",
                                                       ))
                                       )
 
-# int* a;
-# a = malloc(10)
-# int i;
-# for (i = 0; (i leq 9); i = (i add 1))
-#   a[i] = i
-# print(a[5]);
-# int* b;
-# b = &a[6]
-# print(*b);
 pointer = StatementSequence(
-    DeclareVariable("int*", 1, 1, "a",
-                    StatementSequence(
-                        Assignment(Variable("a"), Malloc(Number(10))),
-                        DeclareVariable("int", 1, 1, "i",
-                                        StatementSequence(
-                                            For(Assignment(Variable("i"), Number(0)),
-                                                BinaryOperation(
-                                                    Variable("i"), I0P.I.LEQ, Number(9)),
-                                                Assignment(Variable("i"), BinaryOperation(
-                                                    Variable("i"), I0P.I.ADD, Number(1))),
-                                                StatementSequence(
-                                                    Assignment(ArrayAccess(Variable("a"), Variable(
-                                                        "i")), Variable("i")),
-                                            )),
-                                            Print(ArrayAccess(
-                                                Variable("a"), Number(5))),
-                                            DeclareVariable("int*", 1, 1, "b",
-                                                            StatementSequence(
-                                                                Assignment(Variable("b"), AddressOf(
-                                                                    ArrayAccess(Variable("a"), Number(6)))),
-                                                                Print(Dereference(
-                                                                    Variable("b"))),
-                                                            )
-                                                            )
-                                        ))
-                    ))
+    DeclareStruct("t", [
+        DeclareVariable("int", 1, 7, "a", StatementSequence()),
+        DeclareVariable("t*", 1, 1, "b", StatementSequence()),
+    ],
+        "str",
+        DeclareVariable("t*", 1, 1, "ptr",
+                        StatementSequence(
+                            Assignment(
+                                    Variable(
+                                        "t*", "ptr"), AddressOf(Variable("t", "str"))
+                            ),
+                            Assignment(
+
+                                ArrayAccess(
+                                    Arrow(Variable("t*", "ptr"), "a"), Number(5)), Number(7)),
+
+                            Print(ArrayAccess(
+                                Arrow(Variable("t*", "ptr"), "a"), Number(5)))
+                        )
+                        ))
 )
+
+fib = Program([], [
+    FunctionDefinition("int", "fac", [
+        DeclareVariable("int", 1, 1, "x", StatementSequence())
+    ],
+        IfElse(
+        BinaryOperation(
+            Variable("int", "x"), I0P.I.LEQ, Number(0)),
+        Return(Number(1)),
+        Return(BinaryOperation(
+            Variable("int", "x"),
+            I0P.I.MUL,
+            FunctionCall(Variable("*fac(int)", "fac"), [BinaryOperation(
+                Variable("int", "x"), I0P.I.SUB, Number(1))])
+        ))
+    )
+    ),
+    FunctionDefinition("int", "main", [],
+                       DeclareVariable("int", 1, 1, "res",
+                                       StatementSequence(
+                                           Assignment(Variable("int", "res"),
+                                                      FunctionCall(Variable("*fac(int)", "fac"), [Number(8)])),
+
+                                           Return(Variable("int", "res")))
+                                       )
+                       )
+
+])
 
 if __name__ == '__main__':
     variable_adress: dict[str, AdressEntry] = {}
@@ -108,7 +121,7 @@ if __name__ == '__main__':
 
     code = dot_product_example.code(variable_adress, 0)
 
-    s = State(code)
+    s = Interpreter(code)
 
     s.stack.initVariables(variable_adress, variable_values)
 

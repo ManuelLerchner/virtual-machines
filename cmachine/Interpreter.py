@@ -13,7 +13,8 @@ class Stack:
         self.stack: dict[int, int] = defaultdict(lambda: "_")
         self.SP: int = -1
         self.NP = 10000
-        self.EP = 5000
+        self.EP = -1
+        self.FP = -1
 
     def __getitem__(self, key: int) -> int:
         return self.stack[key]
@@ -27,10 +28,6 @@ class Stack:
     def __repr__(self):
         return str(self.to_list())
 
-    def initVariables(self, variable_adress: dict[str, int], variable_values: dict[str, int]):
-        for [name, adress] in variable_adress.items():
-            self[adress] = variable_values[name]
-
 
 def get_label_positions(code):
     jump_targets = {}
@@ -40,7 +37,7 @@ def get_label_positions(code):
     return jump_targets
 
 
-class State:
+class Interpreter:
     def __init__(self, code: list[Instructions]):
         self.stack: Stack = Stack()
         self.code = code
@@ -48,24 +45,22 @@ class State:
         self.PC: int = 0
 
     def run(self, debug=False):
-        if debug:
-            print(f"Code: {self.code}\n")
-
         step = 0
         while True:
             if self.PC >= len(self.code):
                 break
             IR = self.code[self.PC]
-            if debug:
-                print(
-                    f"About to interpret: PC: {self.PC}, IR: {IR}, SP: {self.stack.SP}")
 
             self.PC += 1
             IR.interpret(self)
 
             if debug:
-                print(f"Resulting stack:\n{self.stack}\n")
+                # sleep(0.001)
+                clear = '\33[2K'
+                print(f"\r{clear}", end="")
+                print(
+                    f"IR: {str(IR):>15} PC: {self.PC:>5}, SP: {self.stack.SP:>5}, EP: {self.stack.EP:>5}, FP: {self.stack.FP:>5} Stack: {self.stack}", end="", flush=True)
+
             step += 1
 
-        if debug:
-            print(f"Execution finished in {step} steps")
+        print(f"\nExecution finished in {step} steps")

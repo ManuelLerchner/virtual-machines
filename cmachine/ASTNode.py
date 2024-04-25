@@ -20,6 +20,10 @@ class ASTNode(metaclass=ABCMeta):
     def pretty_print(self):
         pass
 
+    @abstractmethod
+    def getType(self):
+        pass
+
     def __repr__(self):
         return self.pretty_print(0)
 
