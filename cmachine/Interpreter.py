@@ -7,6 +7,8 @@ from Instructions import Instructions1Params
 if TYPE_CHECKING:
     from Instructions import Instructions
 
+from time import sleep
+
 
 class Stack:
     def __init__(self):
@@ -55,7 +57,7 @@ class Interpreter:
             IR.interpret(self)
 
             if debug:
-                # sleep(0.001)
+                sleep(0.1)
                 clear = '\33[2K'
                 print(f"\r{clear}", end="")
                 print(

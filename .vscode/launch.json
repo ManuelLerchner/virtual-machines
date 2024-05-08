@@ -10,6 +10,13 @@
             "request": "launch",
             "program": "${workspaceFolder}/cmachine/main.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "MaurerMachine",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/maurermachine/main.py",
+            "console": "integratedTerminal"
         }
     ]
 }

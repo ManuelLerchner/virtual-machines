@@ -44,14 +44,14 @@ if __name__ == '__main__':
 
                            StatementSequence(
                                Assignment(Variable("int", "out"),
-                                          FunctionCall(Variable("*fac(int)", "fib"), [Number(16)])),
+                                          FunctionCall(Variable("*fac(int)", "fib"), [Number(4)])),
             Print(Variable("int", "out")),
             Assignment(Variable("int", "out"),
                                    BinaryOperation(
                 Variable("int", "out"),
                 I0P.I.ADD,
                 FunctionCall(
-                    Variable("*fac(int)", "fac"), [Number(16)])
+                    Variable("*fac(int)", "fac"), [Number(2)])
             )),
             Print(Variable("int", "out")),
                                Return(Variable("int", "out"))
@@ -72,6 +72,6 @@ if __name__ == '__main__':
 
     print("Running...\n")
 
-    s.run(debug=False)
+    s.run(debug=True)
 
     print("Exit code: ", s.stack.stack[0], "\n")
