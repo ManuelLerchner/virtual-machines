@@ -28,24 +28,34 @@ class BaseType(ASTNode):
         space = "  " * indent
         return f"{space}{self.value}"
 
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        return set()
+
+
+def getvar(x, addressSpace, sd):
+    t, v = addressSpace[x]
+    if t == "L":
+        return [I1P(I1P.I.PUSHLOC, sd-v)]
+    elif t == "G":
+        return [I1P(I1P.I.PUSHGLOB, v)]
+
 
 class Variable(ASTNode):
     def __init__(self, name):
         self.name = name
 
     def codeV(self, addressSpace: AdressSpace, sd):
-        def getvar(x, addressSpace, sd):
-            t, v = addressSpace[x]
-            if t == "L":
-                return [I1P(I1P.I.PUSHLOC, sd-v)]
-            elif t == "G":
-                return [I1P(I1P.I.PUSHGLOB, v)]
-
         return [*getvar(self.name, addressSpace, sd), I0P(I0P.I.EVAL)]
 
     def pretty_print(self, indent):
         space = "  " * indent
         return f"{space}{self.name}"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        if self.name in boundVars:
+            return set()
+        else:
+            return set(self.name)
 
 
 class UnaryOperator(ASTNode):
@@ -63,6 +73,9 @@ class UnaryOperator(ASTNode):
     def pretty_print(self, indent=0):
         space = "  " * indent
         return f"{space}({self.operator.value} {self.node})"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        return self.node.getFreeVariables(boundVars)
 
 
 class BinaryOperation(ASTNode):
@@ -82,13 +95,16 @@ class BinaryOperation(ASTNode):
         space = "  " * indent
         return f"{space}({self.left} {self.operator.value} {self.right})"
 
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        return self.left.getFreeVariables(boundVars).union(self.right.getFreeVariables(boundVars))
+
 
 LABEL_COUNTER = 0
 
 
 def base10ToBase26Letter_A_is_ONE(num):  # 1-based
-    ''' Converts any positive integer to Base26(letters only) with no 0th 
-    case. Useful for applications such as spreadsheet columns to determine which 
+    ''' Converts any positive integer to Base26(letters only) with no 0th
+    case. Useful for applications such as spreadsheet columns to determine which
     Letterset goes with a positive integer.
     '''
     if num <= 0:
@@ -144,6 +160,9 @@ class IfThenElse(ASTNode):
         space = "  " * indent
         return f"{space}if {self.condition} then {self.then} else {self.else_}"
 
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        return self.condition.getFreeVariables(boundVars).union(self.then.getFreeVariables(boundVars)).union(self.else_.getFreeVariables(boundVars))
+
 
 class LetIn(ASTNode):
 
@@ -166,4 +185,99 @@ class LetIn(ASTNode):
 
     def pretty_print(self, indent=0):
         space = "  " * indent
-        return f"{space}let {' in let '.join([f'{var} = {expr}' for var, expr in self.variables])} in {self.body}"
+        string = ""
+        for i, (var, expr) in enumerate(self.variables):
+            vstring = space+var.pretty_print(indent+i)
+            first_chr = 0
+            for i, c in enumerate(vstring):
+                if c != ' ':
+                    first_chr = i
+                    break
+            letstr = "\n" + vstring[:first_chr]+"let (" + vstring[first_chr:]
+            string += f"{letstr} = {expr.pretty_print(indent+1).strip()} in"
+        string += f"\n{self.body.pretty_print(indent+len(self.variables))})"
+        return string
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        s1 = set()
+        new_bound_vars = set().union(boundVars)
+        for (var, expr) in enumerate(self.variables):
+            s1.union(expr.getFreeVariables(boundVars))
+            new_bound_vars.add(var)
+
+        s2 = self.body.getFreeVariables(new_bound_vars)
+
+        return s1.union(s2)
+
+
+class Fun(ASTNode):
+
+    def __init__(self, variables: List[Variable], body: ASTNode):
+        self.variables = variables
+        self.body = body
+
+    def codeV(self, addressSpace: AdressSpace, sd):
+
+        z = self.getFreeVariables(set())
+
+        newaddressSpace = {}
+
+        code = []
+        for i, var in enumerate(z):
+            code += getvar(var, addressSpace, sd+i)
+            newaddressSpace[var] = ('G', i)
+
+        for i, var in enumerate(self.variables):
+            newaddressSpace[var.name] = ('L', -i)
+
+        A = label_generator()
+        B = label_generator()
+
+        k = len(self.variables)
+
+        return [*code, I1P(I1P.I.MKVEC, len(self.variables)), I1P(I1P.I.MKFUNVAL, A), I1P(I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A), I1P(I1P.I.TARG, k),  *self.body.codeV(newaddressSpace, 0), I1P(I1P.I.RETURN, k), I1P(I1P.I.JUMP_TARGET, B)]
+
+    def pretty_print(self, indent=0):
+        space = "  " * indent
+        return f"{space}fun {', '.join([var.pretty_print(0) for var in self.variables])} -> {self.body}"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        new_bound_vars = set().union(boundVars)
+        for var in self.variables:
+            new_bound_vars.add(var.name)
+
+        return self.body.getFreeVariables(new_bound_vars)
+
+
+class Apply(ASTNode):
+
+    def __init__(self, func: ASTNode, params: List[ASTNode]):
+        self.func = func
+        self.params = params
+
+    def codeV(self, addressSpace: AdressSpace, sd):
+
+        code = []
+        for i, p in enumerate(reversed(self.params)):
+            if (CALL_TYPE == "CBV"):
+                code += p.codeV(addressSpace, sd+3+i)
+            elif (CALL_TYPE == "CBN"):
+                code += p.codeC(addressSpace, sd+3+i)
+
+        code += self.func.codeV(addressSpace, sd+len(self.params) + 3)
+
+        A = label_generator()
+
+        return [I1P(I1P.I.MARK, A), *code, I0P(I0P.I.APPLY), I1P(I1P.I.JUMP_TARGET, A)]
+
+    def pretty_print(self, indent=0):
+        space = "  " * indent
+        return f"{space}{self.func.pretty_print(0)} {', '.join([var.pretty_print(0) for var in self.params])}"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        s = self.func.getFreeVariables(boundVars)
+
+        for p in self.params:
+            s.union(p.getFreeVariables(boundVars))
+
+        return s

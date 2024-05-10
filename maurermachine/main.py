@@ -5,24 +5,29 @@ from Interpreter import Interpreter
 
 if __name__ == '__main__':
 
-    expr = LetIn(
-        [(Variable("a"), BaseType(19)),
-         (Variable("b"),  BinaryOperation(
-             Variable("a"),
-             I0P.I.MUL,
-             Variable("a")
-         ))],
-        BinaryOperation(
-            Variable("a"),
-            I0P.I.ADD,
-            Variable("b")
-        ))
+    expr = LetIn([
+        (Variable("a"), BaseType(17)),
+        (Variable("f"), Fun(
+            [Variable("b")],
 
-    variable_adress: dict[str, (chr, int)] = {}
+            BinaryOperation(
+                Variable("a"),
+                I0P.I.ADD,
+                Variable("b")
+            )
+        )),
+    ],
+        Apply(
+        Variable("f"), [BaseType(42)]
+    ))
+
+    variable_adress: dict[str, (chr, int)] = {
+        "a": ('L', 1)
+    }
 
     print(expr, "\n")
 
-    code = expr.codeB(variable_adress, 0)
+    code = expr.codeV(variable_adress, 1)
 
     print(f"Code: [{len(code)} instructions]\n{code}\n")
 

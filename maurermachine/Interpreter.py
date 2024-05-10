@@ -5,7 +5,7 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Union
 from collections import defaultdict
 
-from Instructions import Instructions1Params
+from Instructions import Instructions1Params, bcolors
 
 if TYPE_CHECKING:
     from Instructions import Instructions
@@ -48,7 +48,7 @@ class BaseHeapElement(HeapElement):
         self.value = value
 
     def __repr__(self):
-        return f"{self.tag} {self.value}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} V:{self.value}"
 
 
 class ClosureHeapElement(HeapElement):
@@ -58,7 +58,7 @@ class ClosureHeapElement(HeapElement):
         self.globPtr = globPtr
 
     def __repr__(self):
-        return f"{self.tag} {self.closurePtr} {self.globPtr}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} CLSRPTR:{bcolors.OKYELLOW+ str(self.closurePtr)+bcolors.ENDC} {self.globPtr}"
 
 
 class FunctionHeapElement(HeapElement):
@@ -69,24 +69,30 @@ class FunctionHeapElement(HeapElement):
         self.globPtr = globPtr
 
     def __repr__(self):
-        return f"{self.tag} {self.codePtr} {self.argPtr} {self.globPtr}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} CP:{bcolors.OKYELLOW+ str(self.codePtr)+bcolors.ENDC} ARGP:{bcolors.OKYELLOW+ str(self.argPtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
 
 
 class VectorHeapElement(HeapElement):
-    def __init__(self, size: int, elements: list[int]):
+    def __init__(self, size: int):
         super().__init__("V")
         self.size = size
-        self.elements = elements
+        self.elements = [None]*size
+
+    def __getitem__(self, key: int) -> int:
+        return self.elements[key]
+
+    def __setitem__(self, key: int, value: int):
+        self.elements[key] = value
 
     def __repr__(self):
-        return f"{self.tag} {self.size} {self.elements}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} N:{self.size} ITMS:{self.elements}"
 
 
 class Heap:
 
     def __init__(self):
         self.heap: dict[int, HeapElement] = {}
-        self.currentAddress = 0
+        self.currentAddress = 100
 
     def __getitem__(self, key: int) -> int:
         return self.heap[key]
@@ -113,11 +119,8 @@ class Heap:
         self.currentAddress += 1
         return addr
 
-    def to_list(self) -> list[int]:
-        return [e for e in self.heap.items()]
-
     def __repr__(self):
-        return str(self.to_list())
+        return " ".join([f'[{bcolors.OKWHITE+ str(add)+bcolors.ENDC}: {e}]' for (add, e) in self.heap.items()])
 
 
 def get_label_positions(code):
@@ -174,9 +177,9 @@ class Interpreter:
                 else:
                     real_ir_length = len(uncolor(str(IR)))
                     print(
-                        f"IR: { str(IR)+' ' * (12 - real_ir_length) } PC: {self.PC:>5}, SP: {self.stack.SP:>5}, FP: {self.stack.FP:>5} Stack: {self.stack}")
+                        f"IR: { str(IR)+' ' * (18 - real_ir_length) } PC: {self.PC:>5}, SP: {self.stack.SP:>5}, FP: {self.stack.FP:>5} Stack: {self.stack}")
                     print(
-                        f"{'' :>49}Heap:  {self.heap}")
+                        f"{'' :>55}Heap:  {self.heap}")
 
             step += 1
 

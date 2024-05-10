@@ -14,10 +14,7 @@ class bcolors:
     OKGREEN = '\033[92m'
     OKYELLOW = '\033[93m'
     OKRED = '\033[91m'
-    OKMAGENTA = '\033[95m'
-    OKORANGE = '\033[33m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
+    OKWHITE = '\033[97m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
@@ -56,12 +53,13 @@ class Instructions0Params(Instructions):
         EVAL = "eval"
         PRINT = "print"
         HALT = "halt"
+        APPLY = "apply"
 
     def __init__(self, instruction: I):
         self.instruction = instruction
 
     def __repr__(self):
-        return f"{bcolors.WARNING+self.instruction.value+bcolors.ENDC}"
+        return f"{bcolors.OKYELLOW+self.instruction.value+bcolors.ENDC}"
 
     def interpret(self, state: Interpreter):
         S = state.stack
@@ -123,6 +121,11 @@ class Instructions1Params(Instructions):
         SLIDE = "SLIDE"
         PUSHLOC = "PUSHLOC"
         PUSHGLOB = "PUSHGLOB"
+        MKVEC = "MKVEC"
+        MKFUNVAL = "MKFUNVAL"
+        TARG = "TARG"
+        RETURN = "RETURN"
+        MARK = "MARK"
 
     def __init__(self, instruction: I, param1):
         self.instruction = instruction
@@ -162,5 +165,14 @@ class Instructions1Params(Instructions):
             tmp = S[S.SP]
             S.SP -= self.param1
             S[S.SP] = tmp
+        elif self.instruction == Instructions1Params.I.MKVEC:
+            h = H.alloc("V", self.param1)
+            S.SP = S.SP-self.param1+1
+            for i in range(self.param1):
+                H[h][i] = S[S.SP+1]
+            S[S.SP] = h
+        elif self.instruction == Instructions1Params.I.MKFUNVAL:
+            a = H.alloc("V", 0)
+            S[S.SP] = H.alloc("F", self.param1, a, S[S.SP])
         else:
-            raise Exception("Unknown instruction")
+            raise Exception("Unknown instruction" + str(self.instruction))
