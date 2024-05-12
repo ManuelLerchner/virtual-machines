@@ -154,6 +154,8 @@ class Instructions1Params(Instructions):
         TARG = "TARG"
         RETURN = "RETURN"
         MARK = "MARK"
+        ALLOC = "ALLOC"
+        REWRITE = "REWRITE"
 
     def __init__(self, instruction: I, param1):
         self.instruction = instruction
@@ -221,5 +223,12 @@ class Instructions1Params(Instructions):
             S[S.SP+3] = self.param1
             S.SP += 3
             state.FP = S.SP
+        elif self.instruction == Instructions1Params.I.ALLOC:
+            for i in range(1, self.param1+1):
+                S[S.SP+i] = H.alloc("C", -1, -1)
+            S.SP += self.param1
+        elif self.instruction == Instructions1Params.I.REWRITE:
+            H[S[S.SP - self.param1]] = H[S[S.SP]]
+            S.SP -= self.param1
         else:
             raise Exception("Unknown instruction" + str(self.instruction))

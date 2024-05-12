@@ -57,7 +57,7 @@ class ClosureHeapElement(HeapElement):
         self.globPtr = globPtr
 
     def __repr__(self):
-        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} CLSRPTR:{bcolors.OKYELLOW+ str(self.closurePtr)+bcolors.ENDC} {self.globPtr}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} CLSRPTR:{bcolors.OKYELLOW+ str(self.closurePtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
 
 
 class FunctionHeapElement(HeapElement):
@@ -151,7 +151,7 @@ class Interpreter:
         self.FP: int = -1
         self.GP: int = -1
 
-    def run(self, debug=False):
+    def run(self, debug=False, pretty=False):
         print("Running...\n\n")
 
         step = 0
@@ -164,20 +164,21 @@ class Interpreter:
             IR.interpret(self)
 
             if debug:
-                # sleep(1)
-                pretty = False
+                sleep(1)
+                real_ir_length = len(uncolor(str(IR)))
+                registers = f"IR: {str(IR)+' ' * (18 - real_ir_length)} PC: {self.PC: > 5}, SP: {self.stack.SP: > 5}, FP: {self.FP: > 5}, GP: {self.GP: > 5}"
                 if pretty:
                     clear = '\33[2K'
                     print(f"\r{clear}", end="")
-                    print("\033[A", end="")
-                    print(
-                        f"IR: {str(IR):<25} PC: {self.PC:>5}, SP: {self.stack.SP:>5}, FP: {self.stack.FP:>5} Stack: {self.stack}",  flush=True)
-                    print("\033[B", end="")
-                    print(
-                        f"{'' :>54}HEAP:  {self.heap}", end="",  flush=True)
+                    print(registers)
+                    print(f"\r{clear}", end="")
+                    print(f"\tStack:\t{self.stack}")
+                    print(f"\r{clear}", end="")
+                    print(f"\tHeap:\t{self.heap}", end="\r")
+                    print("\033[2A", end="")
                 else:
-                    real_ir_length = len(uncolor(str(IR)))
-                    registers = f"IR: {str(IR)+' ' * (18 - real_ir_length)} PC: {self.PC: > 5}, SP: {self.stack.SP: > 5}, FP: {self.FP: > 5}, GP: {self.GP: > 5}"
+                    # sleep(1)
+
                     print(registers)
                     print(f"\tStack:\t{self.stack}")
                     print(f"\tHeap:\t{self.heap}")

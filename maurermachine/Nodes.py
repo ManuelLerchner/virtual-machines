@@ -235,7 +235,7 @@ class Fun(ASTNode):
 
         k = len(self.variables)
 
-        return [*code, I1P(I1P.I.MKVEC, len(self.variables)), I1P(I1P.I.MKFUNVAL, A), I1P(I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A), I1P(I1P.I.TARG, k),  *self.body.codeV(newaddressSpace, 0), I1P(I1P.I.RETURN, k), I1P(I1P.I.JUMP_TARGET, B)]
+        return [*code, I1P(I1P.I.MKVEC, len(z)), I1P(I1P.I.MKFUNVAL, A), I1P(I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A), I1P(I1P.I.TARG, k),  *self.body.codeV(newaddressSpace, 0), I1P(I1P.I.RETURN, k), I1P(I1P.I.JUMP_TARGET, B)]
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -272,7 +272,7 @@ class Apply(ASTNode):
 
     def pretty_print(self, indent=0):
         space = "  " * indent
-        return f"{space}{self.func.pretty_print(0)} {', '.join([var.pretty_print(0) for var in self.params])}"
+        return f"{space}{self.func.pretty_print(0)} {' '.join([var.pretty_print(0) for var in self.params])}"
 
     def getFreeVariables(self, boundVars: set[str]) -> set[str]:
         s = self.func.getFreeVariables(boundVars)
@@ -281,3 +281,54 @@ class Apply(ASTNode):
             s.union(p.getFreeVariables(boundVars))
 
         return s
+
+
+class LetRecIn(ASTNode):
+
+    def __init__(self, variables: List[tuple[Variable, ASTNode]], body: ASTNode):
+        self.variables = variables
+        self.body = body
+
+    def codeV(self, addressSpace: AdressSpace, sd):
+        newaddressSpace = addressSpace.copy()
+
+        for i, (var, expr) in enumerate(self.variables):
+            newaddressSpace[var.name] = ('L', sd+i+1)
+
+        code = []
+        for i, (var, expr) in enumerate(self.variables):
+            if (CALL_TYPE == "CBV"):
+                code += expr.codeV(newaddressSpace, sd+len(self.variables))
+            elif (CALL_TYPE == "CBN"):
+                code += expr.codeC(newaddressSpace, sd+len(self.variables))
+            code += [I1P(I1P.I.REWRITE, len(self.variables)-i)]
+
+        code += [*self.body.codeV(newaddressSpace, sd+len(self.variables))]
+
+        return [I1P(I1P.I.ALLOC, len(self.variables)), *code, I1P(I1P.I.SLIDE, len(self.variables))]
+
+    def pretty_print(self, indent=0):
+        space = "  " * indent
+        string = ""
+        for i, (var, expr) in enumerate(self.variables):
+            vstring = f"{space}{'let rec ' if i == 0 else ''}{var.pretty_print(indent+i)}"
+
+            string += f"\n{vstring} = {expr.pretty_print(indent+1).strip()}"
+            if i != len(self.variables)-1:
+                string += " and"
+            else:
+                string += " in"
+
+        string += f"\n{self.body.pretty_print(indent+len(self.variables))}"
+        return string
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        s1 = set()
+        new_bound_vars = set().union(boundVars)
+        for (var, expr) in enumerate(self.variables):
+            s1.union(expr.getFreeVariables(boundVars))
+            new_bound_vars.add(var)
+
+        s2 = self.body.getFreeVariables(new_bound_vars)
+
+        return s1.union(s2)
