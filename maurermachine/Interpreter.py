@@ -17,7 +17,6 @@ class Stack:
     def __init__(self):
         self.stack: dict[int, int] = defaultdict(lambda: "_")
         self.SP: int = -1
-        self.FP = -1
 
     def __getitem__(self, key: int) -> int:
         return self.stack[key]
@@ -149,6 +148,8 @@ class Interpreter:
         self.code = code
         self.jumpLabels = get_label_positions(code)
         self.PC: int = 0
+        self.FP: int = -1
+        self.GP: int = -1
 
     def run(self, debug=False):
         print("Running...\n\n")
@@ -176,10 +177,10 @@ class Interpreter:
                         f"{'' :>54}HEAP:  {self.heap}", end="",  flush=True)
                 else:
                     real_ir_length = len(uncolor(str(IR)))
-                    print(
-                        f"IR: { str(IR)+' ' * (18 - real_ir_length) } PC: {self.PC:>5}, SP: {self.stack.SP:>5}, FP: {self.stack.FP:>5} Stack: {self.stack}")
-                    print(
-                        f"{'' :>55}Heap:  {self.heap}")
+                    registers = f"IR: {str(IR)+' ' * (18 - real_ir_length)} PC: {self.PC: > 5}, SP: {self.stack.SP: > 5}, FP: {self.FP: > 5}, GP: {self.GP: > 5}"
+                    print(registers)
+                    print(f"\tStack:\t{self.stack}")
+                    print(f"\tHeap:\t{self.heap}")
 
             step += 1
 
