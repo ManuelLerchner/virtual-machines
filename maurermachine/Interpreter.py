@@ -33,47 +33,68 @@ class Stack:
 
 class HeapElement:
     @abstractmethod
-    def __init__(self, tag: str):
+    def __init__(self, heap: Heap, tag: str,):
+        self.heap = heap
         self.tag = tag
+        self.refCount = 1
 
     @abstractmethod
     def __repr__(self):
         pass
 
+    @abstractmethod
+    def get_references(self):
+        pass
+
 
 class BaseHeapElement(HeapElement):
-    def __init__(self, value: int):
-        super().__init__("B")
+    def __init__(self, heap, value: int):
+        super().__init__(heap, "B")
         self.value = value
 
     def __repr__(self):
-        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} V:{self.value}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} RC:{self.refCount} V:{self.value}"
+
+    def get_references(self):
+        return []
 
 
 class ClosureHeapElement(HeapElement):
-    def __init__(self, closurePtr: int, globPtr: int):
-        super().__init__("C")
+    def __init__(self, heap, closurePtr: int, globPtr: int):
+        super().__init__(heap, "C")
         self.closurePtr = closurePtr
         self.globPtr = globPtr
 
+        self.heap[closurePtr].refCount += 1
+        self.heap[globPtr].refCount += 1
+
     def __repr__(self):
-        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} CLSRPTR:{bcolors.OKYELLOW+ str(self.closurePtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} RC:{self.refCount} CLSRPTR:{bcolors.OKYELLOW+ str(self.closurePtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
+
+    def get_references(self):
+        return [self.closurePtr, self.globPtr]
 
 
 class FunctionHeapElement(HeapElement):
-    def __init__(self, codePtr: int, argPtr: int, globPtr: int):
-        super().__init__("F")
+    def __init__(self, heap, codePtr: int, argPtr: int, globPtr: int):
+        super().__init__(heap, "F")
         self.codePtr = codePtr
         self.argPtr = argPtr
         self.globPtr = globPtr
 
+        self.heap[argPtr].refCount += 1
+        self.heap[globPtr].refCount += 1
+
     def __repr__(self):
-        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} CP:{bcolors.OKYELLOW+ str(self.codePtr)+bcolors.ENDC} ARGP:{bcolors.OKYELLOW+ str(self.argPtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} RC:{self.refCount} CP:{self.codePtr} ARGP:{bcolors.OKYELLOW+ str(self.argPtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
+
+    def get_references(self):
+        return [self.argPtr, self.globPtr]
 
 
 class VectorHeapElement(HeapElement):
-    def __init__(self, size: int):
-        super().__init__("V")
+    def __init__(self, heap, size: int):
+        super().__init__(heap, "V")
         self.size = size
         self.elements = [None]*size
 
@@ -81,10 +102,15 @@ class VectorHeapElement(HeapElement):
         return self.elements[key]
 
     def __setitem__(self, key: int, value: int):
+        self.heap[value].refCount += 1
+
         self.elements[key] = value
 
     def __repr__(self):
-        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} N:{self.size} ITMS:{self.elements}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} RC:{self.refCount} N:{self.size} ITMS:{self.elements}"
+
+    def get_references(self):
+        return self.elements
 
 
 class Heap:
@@ -94,6 +120,10 @@ class Heap:
         self.currentAddress = 100
 
     def __getitem__(self, key: int) -> int:
+        if (key == -1):
+            # dummy value
+            return BaseHeapElement(self, 0)
+
         return self.heap[key]
 
     def __setitem__(self, key: int, element: HeapElement):
@@ -103,13 +133,13 @@ class Heap:
 
         element = None
         if type == "B":
-            element = BaseHeapElement(*args)
+            element = BaseHeapElement(self, *args)
         elif type == "C":
-            element = ClosureHeapElement(*args)
+            element = ClosureHeapElement(self, *args)
         elif type == "F":
-            element = FunctionHeapElement(*args)
+            element = FunctionHeapElement(self, *args)
         elif type == "V":
-            element = VectorHeapElement(*args)
+            element = VectorHeapElement(self, *args)
         else:
             raise Exception("Unknown type")
 
@@ -117,6 +147,20 @@ class Heap:
         self.heap[addr] = element
         self.currentAddress += 1
         return addr
+
+    def collect_garbage(self):
+        to_delete = []
+        for addr, element in self.heap.items():
+            if element.refCount <= 0:
+                to_delete.append(addr)
+        for addr in to_delete:
+            print(f"Heap: Garbage collecting {addr}")
+
+            # decrement references
+            for ref in self.heap[addr].get_references():
+                self.heap[ref].refCount -= 1
+
+            del self.heap[addr]
 
     def __repr__(self):
         return " ".join([f'[{bcolors.OKWHITE+ str(add)+bcolors.ENDC}: {e}]' for (add, e) in self.heap.items()])
@@ -163,8 +207,10 @@ class Interpreter:
             self.PC += 1
             IR.interpret(self)
 
+            # self.heap.collect_garbage()
+
             if debug:
-                sleep(1)
+                # sleep(0.001)
                 real_ir_length = len(uncolor(str(IR)))
                 registers = f"IR: {str(IR)+' ' * (18 - real_ir_length)} PC: {self.PC: > 5}, SP: {self.stack.SP: > 5}, FP: {self.FP: > 5}, GP: {self.GP: > 5}"
                 if pretty:
@@ -186,3 +232,4 @@ class Interpreter:
             step += 1
 
         print(f"\n\nExecution finished in {step} steps")
+        print(f"Heap Size: {len(self.heap.heap)}")

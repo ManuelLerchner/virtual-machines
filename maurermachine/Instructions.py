@@ -2,6 +2,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from enum import Enum
 from typing import TYPE_CHECKING
+import copy
 
 if TYPE_CHECKING:
     from Interpreter import Interpreter
@@ -119,6 +120,10 @@ class Instructions0Params(Instructions):
             state.PC = H[h].codePtr
             for i in range(H[H[h].argPtr].size):
                 S[S.SP+i] = H[H[h].argPtr][i]
+
+            # decrement reference counters when updating SP
+            H[h].refCount -= 1
+
             S.SP += H[H[h].argPtr].size - 1
         elif self.instruction == Instructions0Params.I.MKVEC0:
             g = S.SP - state.FP
@@ -126,6 +131,10 @@ class Instructions0Params(Instructions):
             S.SP = state.FP + 1
             for i in range(g):
                 H[h][i] = S[S.SP+i]
+
+            # decrement reference counters when updating SP
+            H[S[S.SP]].refCount -= 1
+
             S[S.SP] = h
         elif self.instruction == Instructions0Params.I.WRAP:
             S[S.SP] = H.alloc("F", state.PC-1, S[S.SP], state.GP)
@@ -133,6 +142,11 @@ class Instructions0Params(Instructions):
             state.GP = S[state.FP-2]
             S[state.FP-2] = S[S.SP]
             state.PC = S[state.FP]
+
+            # decrement reference counters when updating SP
+            for i in range(state.FP+1, S.SP):
+                H[S[i]].refCount -= 1
+
             S.SP = state.FP - 2
             state.FP = S[state.FP-1]
         else:
@@ -184,18 +198,36 @@ class Instructions1Params(Instructions):
             pass
         elif self.instruction == Instructions1Params.I.PUSHLOC:
             S[S.SP+1] = S[S.SP - self.param1]
+
+            # increment reference counters when updating SP
+            H[S[S.SP+1]].refCount += 1
+
             S.SP += 1
         elif self.instruction == Instructions1Params.I.PUSHGLOB:
             S.SP += 1
             S[S.SP] = H[state.GP][self.param1]
+
+            # increment reference counters when updating SP
+            H[S[S.SP]].refCount += 1
+
         elif self.instruction == Instructions1Params.I.SLIDE:
+
+            # decrement reference counters when updating SP
+            for i in range(S.SP-self.param1, S.SP):
+                H[S[i]].refCount -= 1
+
             S[S.SP-self.param1] = S[S.SP]
+
             S.SP -= self.param1
         elif self.instruction == Instructions1Params.I.MKVEC:
             h = H.alloc("V", self.param1)
             S.SP = S.SP-self.param1+1
             for i in range(self.param1):
                 H[h][i] = S[S.SP]
+
+            # decrement reference counters when updating SP
+            H[S[S.SP]].refCount -= 1
+
             S[S.SP] = h
         elif self.instruction == Instructions1Params.I.MKFUNVAL:
             a = H.alloc("V", 0)
@@ -228,7 +260,18 @@ class Instructions1Params(Instructions):
                 S[S.SP+i] = H.alloc("C", -1, -1)
             S.SP += self.param1
         elif self.instruction == Instructions1Params.I.REWRITE:
-            H[S[S.SP - self.param1]] = H[S[S.SP]]
+
+            old_ref_count = H[S[S.SP - self.param1]].refCount
+
+            co = copy.copy(H[S[S.SP]])
+
+            H[S[S.SP - self.param1]] = co
+
+            # decrement reference counters when updating SP
+            H[S[S.SP]].refCount -= 1
+
+            H[S[S.SP - self.param1]].refCount = old_ref_count
+
             S.SP -= self.param1
         else:
             raise Exception("Unknown instruction" + str(self.instruction))

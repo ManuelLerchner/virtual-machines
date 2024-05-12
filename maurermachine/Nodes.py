@@ -55,7 +55,7 @@ class Variable(ASTNode):
         if self.name in boundVars:
             return set()
         else:
-            return set(self.name)
+            return set([self.name])
 
 
 class UnaryOperator(ASTNode):
@@ -313,13 +313,13 @@ class LetRecIn(ASTNode):
         for i, (var, expr) in enumerate(self.variables):
             vstring = f"{space}{'let rec ' if i == 0 else ''}{var.pretty_print(indent+i)}"
 
-            string += f"\n{vstring} = {expr.pretty_print(indent+1).strip()}"
+            string += f"\n{vstring} = ({expr.pretty_print(indent+1).strip()}"
             if i != len(self.variables)-1:
                 string += " and"
             else:
                 string += " in"
 
-        string += f"\n{self.body.pretty_print(indent+len(self.variables))}"
+        string += f"\n{self.body.pretty_print(indent+len(self.variables))})"
         return string
 
     def getFreeVariables(self, boundVars: set[str]) -> set[str]:

@@ -33,3 +33,39 @@ expr2 = LetIn([
     Apply(
     Variable("f"), [BaseType(42)]
 ))
+
+
+expr = LetIn([
+    (Variable("fac"),
+     LetRecIn([
+             (Variable("f"), Fun(
+                 [Variable("x"), Variable("y")],
+
+                 IfThenElse(
+                     BinaryOperation(
+                         Variable("y"),
+                         I0P.I.LT,
+                         BaseType(1)
+                     ),
+                     Variable("x"),
+
+                     Apply(
+                         Variable("f"),
+                         [BinaryOperation(
+                             Variable("x"), I0P.I.MUL, Variable("y")),
+
+                          BinaryOperation(
+                             Variable("y"),
+                             I0P.I.SUB,
+                             BaseType(1)
+                         )]
+                     )
+                 )))
+             ],
+        Apply(
+         Variable("f"), [BaseType(1)]
+     )))],
+    Apply(
+    Variable("fac"), [BaseType(10)]
+)
+)

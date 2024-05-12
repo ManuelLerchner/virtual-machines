@@ -5,43 +5,48 @@ from Interpreter import Interpreter
 
 if __name__ == '__main__':
 
-    expr = LetIn([
-        (Variable("fac"),
-         LetRecIn([
-             (Variable("f"), Fun(
-                  [Variable("x"), Variable("y")],
+    expr = LetRecIn([
+        (Variable("fib"), Fun(
+            [Variable("n")],
 
-                  IfThenElse(
-                      BinaryOperation(
-                          Variable("y"),
-                          I0P.I.LT,
-                          BaseType(1)
-                      ),
-                      Variable("x"),
+            IfThenElse(
+                BinaryOperation(
+                    Variable("n"),
+                    I0P.I.LEQ,
+                    BaseType(1)
+                ),
+                Variable("n"),
 
-                      Apply(
-                          Variable("f"),
-                          [BinaryOperation(
-                              Variable("x"), I0P.I.MUL, Variable("y")),
+                BinaryOperation(
+                    Apply(
+                        Variable("fib"),
+                        [BinaryOperation(
+                            Variable("n"), I0P.I.SUB, BaseType(1)),
+                         ]
+                    ),
+                    I0P.I.ADD,
+                    Apply(
+                        Variable("fib"),
+                        [BinaryOperation(
+                            Variable("n"), I0P.I.SUB, BaseType(2)),
+                         ]
+                    ))
+            )))
+    ],
+        LetIn([
+            (Variable("fc"), Apply(
+                Variable("fib"), [
+                    BaseType(400),
+                    BaseType(10)
+                ]))],
 
-                              BinaryOperation(
-                              Variable("y"),
-                              I0P.I.SUB,
-                              BaseType(1)
-                          )]
-                      )
-                  )))
-         ],
-            Apply(
-             Variable("f"), [BaseType(1)]
-         )))],
-        Apply(
-            Variable("fac"), [BaseType(5)]
-    )
-    )
+            Variable("fc")
+
+
+    ))
 
     variable_adress: dict[str, (chr, int)] = {
-        "a": ('L', 1)
+
     }
 
     print(expr, "\n")
@@ -52,6 +57,6 @@ if __name__ == '__main__':
 
     s = Interpreter(code)
 
-    s.run(debug=True, pretty=True)
+    s.run(debug=True, pretty=False)
 
-    # print("Exit code: ", s.stack.stack[0], "\n")
+    print("Exit code: ", s.stack.stack[0], "\n")
