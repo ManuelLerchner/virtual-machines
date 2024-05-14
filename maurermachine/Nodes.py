@@ -1,7 +1,7 @@
 import random
 import string
 from typing import Any, List
-from ASTNode import ASTNode
+from ASTNode import ASTNode, label_generator, getvar
 from Instructions import Instructions0Params as I0P
 from enum import Enum
 from Instructions import Instructions1Params as I1P, bcolors
@@ -11,7 +11,7 @@ NEWLINE = "\n"
 AdressSpace = dict[str, (chr, int)]
 
 # CALL_TYPE = "CBV"
-CALL_TYPE = "CBV"
+CALL_TYPE = "CBN"
 
 
 class BaseType(ASTNode):
@@ -30,14 +30,6 @@ class BaseType(ASTNode):
 
     def getFreeVariables(self, boundVars: set[str]) -> set[str]:
         return set()
-
-
-def getvar(x, addressSpace, sd):
-    t, v = addressSpace[x]
-    if t == "L":
-        return [I1P(I1P.I.PUSHLOC, sd-v)]
-    elif t == "G":
-        return [I1P(I1P.I.PUSHGLOB, v)]
 
 
 class Variable(ASTNode):
@@ -97,30 +89,6 @@ class BinaryOperation(ASTNode):
 
     def getFreeVariables(self, boundVars: set[str]) -> set[str]:
         return self.left.getFreeVariables(boundVars).union(self.right.getFreeVariables(boundVars))
-
-
-LABEL_COUNTER = 0
-
-
-def base10ToBase26Letter_A_is_ONE(num):  # 1-based
-    ''' Converts any positive integer to Base26(letters only) with no 0th
-    case. Useful for applications such as spreadsheet columns to determine which
-    Letterset goes with a positive integer.
-    '''
-    if num <= 0:
-        return ""
-    s = ""
-    while (num > 0):
-        s += (chr(97+(num-1) % 26))
-        num -= 1
-        num //= 26
-    return s[::-1]
-
-
-def label_generator():
-    global LABEL_COUNTER
-    LABEL_COUNTER += 1
-    return f"{base10ToBase26Letter_A_is_ONE(LABEL_COUNTER)}"
 
 
 class IfThenElse(ASTNode):

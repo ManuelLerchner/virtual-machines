@@ -33,15 +33,11 @@ if __name__ == '__main__':
                     ))
             )))
     ],
-        LetIn([
-            (Variable("fc"), Apply(
-                Variable("fib"), [
-                    BaseType(400),
-                    BaseType(10)
-                ]))],
+        Apply(
+        Variable("fib"), [
 
-            Variable("fc")
-
+            BaseType(10)
+        ]
 
     ))
 
@@ -57,6 +53,6 @@ if __name__ == '__main__':
 
     s = Interpreter(code)
 
-    s.run(debug=True, pretty=False)
+    s.run(debug=False, pretty=False)
 
     print("Exit code: ", s.stack.stack[0], "\n")

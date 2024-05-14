@@ -36,7 +36,6 @@ class HeapElement:
     def __init__(self, heap: Heap, tag: str,):
         self.heap = heap
         self.tag = tag
-        self.refCount = 1
 
     @abstractmethod
     def __repr__(self):
@@ -53,7 +52,7 @@ class BaseHeapElement(HeapElement):
         self.value = value
 
     def __repr__(self):
-        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} RC:{self.refCount} V:{self.value}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} V:{self.value}"
 
     def get_references(self):
         return []
@@ -65,11 +64,8 @@ class ClosureHeapElement(HeapElement):
         self.closurePtr = closurePtr
         self.globPtr = globPtr
 
-        self.heap[closurePtr].refCount += 1
-        self.heap[globPtr].refCount += 1
-
     def __repr__(self):
-        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} RC:{self.refCount} CLSRPTR:{bcolors.OKYELLOW+ str(self.closurePtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} CLSRPTR:{bcolors.OKYELLOW+ str(self.closurePtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
 
     def get_references(self):
         return [self.closurePtr, self.globPtr]
@@ -82,11 +78,8 @@ class FunctionHeapElement(HeapElement):
         self.argPtr = argPtr
         self.globPtr = globPtr
 
-        self.heap[argPtr].refCount += 1
-        self.heap[globPtr].refCount += 1
-
     def __repr__(self):
-        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} RC:{self.refCount} CP:{self.codePtr} ARGP:{bcolors.OKYELLOW+ str(self.argPtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} CP:{self.codePtr} ARGP:{bcolors.OKYELLOW+ str(self.argPtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
 
     def get_references(self):
         return [self.argPtr, self.globPtr]
@@ -102,12 +95,10 @@ class VectorHeapElement(HeapElement):
         return self.elements[key]
 
     def __setitem__(self, key: int, value: int):
-        self.heap[value].refCount += 1
-
         self.elements[key] = value
 
     def __repr__(self):
-        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} RC:{self.refCount} N:{self.size} ITMS:{self.elements}"
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} N:{self.size} ITMS:{self.elements}"
 
     def get_references(self):
         return self.elements
@@ -147,20 +138,6 @@ class Heap:
         self.heap[addr] = element
         self.currentAddress += 1
         return addr
-
-    def collect_garbage(self):
-        to_delete = []
-        for addr, element in self.heap.items():
-            if element.refCount <= 0:
-                to_delete.append(addr)
-        for addr in to_delete:
-            print(f"Heap: Garbage collecting {addr}")
-
-            # decrement references
-            for ref in self.heap[addr].get_references():
-                self.heap[ref].refCount -= 1
-
-            del self.heap[addr]
 
     def __repr__(self):
         return " ".join([f'[{bcolors.OKWHITE+ str(add)+bcolors.ENDC}: {e}]' for (add, e) in self.heap.items()])
