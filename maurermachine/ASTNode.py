@@ -61,8 +61,8 @@ class ASTNode(metaclass=ABCMeta):
         new_address_space = {}
         code = []
         for i, var in enumerate(freeVars):
-            code += getvar(var, addressSpace, sd+i)
             new_address_space[var] = ("G", i)
+            code += getvar(var, addressSpace, sd+i)
 
         A = label_generator()
         B = label_generator()

@@ -2,7 +2,7 @@ from __future__ import annotations
 from pyparsing import *
 import string
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, List, Union
 from collections import defaultdict
 
 from Instructions import Instructions1Params, bcolors
@@ -42,7 +42,7 @@ class HeapElement:
         pass
 
     @abstractmethod
-    def get_references(self):
+    def get_references_rec(self, seen):
         pass
 
 
@@ -54,8 +54,8 @@ class BaseHeapElement(HeapElement):
     def __repr__(self):
         return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} V:{self.value}"
 
-    def get_references(self):
-        return []
+    def get_references_rec(self, seen):
+        return set()
 
 
 class ClosureHeapElement(HeapElement):
@@ -67,8 +67,12 @@ class ClosureHeapElement(HeapElement):
     def __repr__(self):
         return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} CLSRPTR:{bcolors.OKYELLOW+ str(self.closurePtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
 
-    def get_references(self):
-        return [self.closurePtr, self.globPtr]
+    def get_references_rec(self, seen):
+        if self.globPtr in seen:
+            return set()
+        else:
+            seen.add(self.globPtr)
+            return {self.globPtr}.union(self.heap[self.globPtr].get_references_rec(seen))
 
 
 class FunctionHeapElement(HeapElement):
@@ -81,8 +85,12 @@ class FunctionHeapElement(HeapElement):
     def __repr__(self):
         return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} CP:{self.codePtr} ARGP:{bcolors.OKYELLOW+ str(self.argPtr)+bcolors.ENDC} GLBPTR:{bcolors.OKYELLOW+str(self.globPtr)+bcolors.ENDC}"
 
-    def get_references(self):
-        return [self.argPtr, self.globPtr]
+    def get_references_rec(self, seen):
+        if self.globPtr in seen:
+            return set()
+        else:
+            seen.add(self.globPtr)
+            return {self.globPtr, self.argPtr}.union(self.heap[self.globPtr].get_references_rec(seen)).union(self.heap[self.argPtr].get_references_rec(seen))
 
 
 class VectorHeapElement(HeapElement):
@@ -100,8 +108,15 @@ class VectorHeapElement(HeapElement):
     def __repr__(self):
         return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} N:{self.size} ITMS:{self.elements}"
 
-    def get_references(self):
-        return self.elements
+    def get_references_rec(self, seen):
+        s = set()
+        for i in range(self.size):
+            if self.elements[i] in seen:
+                return set()
+            else:
+                seen.add(self.elements[i])
+                s.union(self.heap[self.elements[i]].get_references_rec(seen))
+        return s
 
 
 class Heap:
@@ -138,6 +153,18 @@ class Heap:
         self.heap[addr] = element
         self.currentAddress += 1
         return addr
+
+    def collect_garbage(self, stack: Stack):
+        reachable = set()
+        for i in range(stack.SP+1):
+            if stack[i] in self.heap:
+                reachable.add(stack[i])
+                reachable = reachable.union(
+                    self.heap[stack[i]].get_references_rec(reachable))
+
+        for key in list(self.heap.keys()):
+            if key not in reachable:
+                del self.heap[key]
 
     def __repr__(self):
         return " ".join([f'[{bcolors.OKWHITE+ str(add)+bcolors.ENDC}: {e}]' for (add, e) in self.heap.items()])
@@ -184,8 +211,6 @@ class Interpreter:
             self.PC += 1
             IR.interpret(self)
 
-            # self.heap.collect_garbage()
-
             if debug:
                 # sleep(0.001)
                 real_ir_length = len(uncolor(str(IR)))
@@ -206,7 +231,12 @@ class Interpreter:
                     print(f"\tStack:\t{self.stack}")
                     print(f"\tHeap:\t{self.heap}")
 
+            if step % 10 == 0:
+                self.heap.collect_garbage(self.stack)
+
             step += 1
+
+        self.heap.collect_garbage(self.stack)
 
         print(f"\n\nExecution finished in {step} steps")
         print(f"Heap Size: {len(self.heap.heap)}")

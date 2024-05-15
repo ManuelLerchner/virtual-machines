@@ -69,3 +69,39 @@ expr = LetIn([
     Variable("fac"), [BaseType(10)]
 )
 )
+
+expr = LetRecIn([
+    (Variable("fib"), Fun(
+        [Variable("n")],
+
+        IfThenElse(
+            BinaryOperation(
+                Variable("n"),
+                I0P.I.LEQ,
+                BaseType(1)
+            ),
+            Variable("n"),
+
+            BinaryOperation(
+                Apply(
+                    Variable("fib"),
+                    [BinaryOperation(
+                        Variable("n"), I0P.I.SUB, BaseType(1)),
+                     ]
+                ),
+                I0P.I.ADD,
+                Apply(
+                    Variable("fib"),
+                    [BinaryOperation(
+                        Variable("n"), I0P.I.SUB, BaseType(2)),
+                     ]
+                ))
+        )))
+],
+    Apply(
+    Variable("fib"), [
+
+        BaseType(10)
+    ]
+
+))

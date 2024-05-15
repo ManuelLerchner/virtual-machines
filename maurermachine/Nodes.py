@@ -24,6 +24,9 @@ class BaseType(ASTNode):
     def codeV(self, addressSpace: AdressSpace, sd):
         return [I1P(I1P.I.LOADC, self.value), I0P(I0P.I.MKBASIC)]
 
+    def codeC(self, addressSpace: AdressSpace, sd):
+        return self.codeV(addressSpace, sd)
+
     def pretty_print(self, indent):
         space = "  " * indent
         return f"{space}{self.value}"
@@ -38,6 +41,9 @@ class Variable(ASTNode):
 
     def codeV(self, addressSpace: AdressSpace, sd):
         return [*getvar(self.name, addressSpace, sd), I0P(I0P.I.EVAL)]
+
+    def codeC(self, addressSpace: AdressSpace, sd):
+        return getvar(self.name, addressSpace, sd)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -169,9 +175,11 @@ class LetIn(ASTNode):
     def getFreeVariables(self, boundVars: set[str]) -> set[str]:
         s1 = set()
         new_bound_vars = set().union(boundVars)
-        for (var, expr) in enumerate(self.variables):
+
+        for (var, expr) in self.variables:
+            new_bound_vars.add(var.name)
+        for (var, expr) in self.variables:
             s1.union(expr.getFreeVariables(boundVars))
-            new_bound_vars.add(var)
 
         s2 = self.body.getFreeVariables(new_bound_vars)
 
@@ -204,6 +212,9 @@ class Fun(ASTNode):
         k = len(self.variables)
 
         return [*code, I1P(I1P.I.MKVEC, len(z)), I1P(I1P.I.MKFUNVAL, A), I1P(I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A), I1P(I1P.I.TARG, k),  *self.body.codeV(newaddressSpace, 0), I1P(I1P.I.RETURN, k), I1P(I1P.I.JUMP_TARGET, B)]
+
+    def codeC(self, addressSpace: AdressSpace, sd):
+        return self.codeV(addressSpace, sd)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -293,7 +304,7 @@ class LetRecIn(ASTNode):
     def getFreeVariables(self, boundVars: set[str]) -> set[str]:
         s1 = set()
         new_bound_vars = set().union(boundVars)
-        for (var, expr) in enumerate(self.variables):
+        for (var, expr) in self.variables:
             s1.union(expr.getFreeVariables(boundVars))
             new_bound_vars.add(var)
 
