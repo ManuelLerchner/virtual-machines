@@ -61,6 +61,9 @@ class Instructions0Params(Instructions):
         MARK0 = "mark0"
         APPLY0 = "apply0"
         UPDATE = "update"
+        COPYGLOB = "copyglob"
+        NIL = "nil"
+        CONS = "cons"
 
     def __init__(self, instruction: I):
         self.instruction = instruction
@@ -111,6 +114,12 @@ class Instructions0Params(Instructions):
                 S[S.SP] = H[S[S.SP]].value
         elif self.instruction == Instructions0Params.I.MKBASIC:
             S[S.SP] = H.alloc("B", S[S.SP])
+        elif self.instruction == Instructions0Params.I.NIL:
+            S.SP += 1
+            S[S.SP] = H.alloc("LNIL")
+        elif self.instruction == Instructions0Params.I.CONS:
+            S[S.SP-1] = H.alloc("LCONS", S[S.SP-1], S[S.SP])
+            S.SP -= 1
         elif self.instruction == Instructions0Params.I.EVAL:
             h = S[S.SP]
             if H[h].tag == "C":
@@ -165,6 +174,9 @@ class Instructions0Params(Instructions):
                 Instructions0Params.I.POPENV).interpret(state)
             Instructions1Params(
                 Instructions1Params.I.REWRITE, 1).interpret(state)
+        elif self.instruction == Instructions0Params.I.COPYGLOB:
+            S.SP += 1
+            S[S.SP] = state.GP
         else:
             raise Exception("Unknown instruction")
 
@@ -187,6 +199,9 @@ class Instructions1Params(Instructions):
         ALLOC = "ALLOC"
         REWRITE = "REWRITE"
         MKCLOS = "MKCLOS"
+        GET = "GET"
+        GETVEC = "GETVEC"
+        TLIST = "TLIST"
 
     def __init__(self, instruction: I, param1):
         self.instruction = instruction
@@ -226,8 +241,7 @@ class Instructions1Params(Instructions):
             h = H.alloc("V", self.param1)
             S.SP = S.SP-self.param1+1
             for i in range(self.param1):
-                H[h][i] = S[S.SP]
-
+                H[h][i] = S[S.SP+i]
             S[S.SP] = h
         elif self.instruction == Instructions1Params.I.MKFUNVAL:
             a = H.alloc("V", 0)
@@ -268,5 +282,31 @@ class Instructions1Params(Instructions):
         elif self.instruction == Instructions1Params.I.MKCLOS:
             h = H.alloc("C", self.param1, S[S.SP])
             S[S.SP] = h
+        elif self.instruction == Instructions1Params.I.GET:
+            if H[S[S.SP]].tag != "V":
+                raise Exception("Expected vector")
+            vec = H[S[S.SP]]
+            if vec.size <= self.param1:
+                raise Exception("Out of bounds")
+            S[S.SP] = vec[self.param1]
+        elif self.instruction == Instructions1Params.I.GETVEC:
+            if H[S[S.SP]].tag != "V":
+                raise Exception("Expected vector")
+            vec = H[S[S.SP]]
+            S.SP -= 1
+            for i in range(vec.size):
+                S.SP += 1
+                S[S.SP] = vec[i]
+        elif self.instruction == Instructions1Params.I.TLIST:
+            h = S[S.SP]
+            if H[h].tag != "LCONS" and H[h].tag != "LNIL":
+                raise Exception("Expected list")
+            if H[h].tag == "LNIL":
+                S.SP -= 1
+            else:
+                S[S.SP+1] = H[S[S.SP]].tail
+                S[S.SP] = H[S[S.SP]].head
+                S.SP += 1
+                state.PC = self.param1
         else:
             raise Exception("Unknown instruction" + str(self.instruction))

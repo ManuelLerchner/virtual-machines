@@ -58,7 +58,7 @@ class ASTNode(metaclass=ABCMeta):
         Stores a closure on the heap and returns a reference on the stack
         """
         freeVars = self.getFreeVariables(set())
-        new_address_space = {}
+        new_address_space = addressSpace.copy()
         code = []
         for i, var in enumerate(freeVars):
             new_address_space[var] = ("G", i)

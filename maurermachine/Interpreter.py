@@ -119,6 +119,36 @@ class VectorHeapElement(HeapElement):
         return s
 
 
+class EmptyListHeapElement(HeapElement):
+    def __init__(self, heap):
+        super().__init__(heap, "LNIL")
+
+    def __repr__(self):
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC}"
+
+    def get_references_rec(self, seen):
+        return set()
+
+
+class ConsHeapElement(HeapElement):
+    def __init__(self, heap, head: int, tail: int):
+        super().__init__(heap, "LCONS")
+        self.head = head
+        self.tail = tail
+
+    def __repr__(self):
+        return f"{bcolors.OKRED+ str(self.tag)+bcolors.ENDC} H:{self.head} T:{self.tail}"
+
+    def get_references_rec(self, seen):
+        if not self.head in seen:
+            seen.add(self.head)
+            self.heap[self.head].get_references_rec(seen)
+        if not self.tail in seen:
+            seen.add(self.tail)
+            self.heap[self.tail].get_references_rec(seen)
+        return seen
+
+
 class Heap:
 
     def __init__(self):
@@ -146,6 +176,10 @@ class Heap:
             element = FunctionHeapElement(self, *args)
         elif type == "V":
             element = VectorHeapElement(self, *args)
+        elif type == "LNIL":
+            element = EmptyListHeapElement(self)
+        elif type == "LCONS":
+            element = ConsHeapElement(self, *args)
         else:
             raise Exception("Unknown type")
 
@@ -224,12 +258,14 @@ class Interpreter:
                     print(f"\r{clear}", end="")
                     print(f"\tHeap:\t{self.heap}", end="\r")
                     print("\033[2A", end="")
+
                 else:
                     # sleep(1)
 
                     print(registers)
-                    print(f"\tStack:\t{self.stack}")
-                    print(f"\tHeap:\t{self.heap}")
+                    print(f"Stack:\t{self.stack}")
+                    print(f"Heap:\t{self.heap}")
+                    print()
 
             if step % 10 == 0:
                 self.heap.collect_garbage(self.stack)

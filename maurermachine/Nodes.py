@@ -10,8 +10,8 @@ NEWLINE = "\n"
 
 AdressSpace = dict[str, (chr, int)]
 
-# CALL_TYPE = "CBV"
-CALL_TYPE = "CBN"
+CALL_TYPE = "CBV"
+# CALL_TYPE = "CBN"
 
 
 class BaseType(ASTNode):
@@ -54,6 +54,61 @@ class Variable(ASTNode):
             return set()
         else:
             return set([self.name])
+
+
+class Nil(ASTNode):
+    def __init__(self):
+        pass
+
+    def codeV(self, addressSpace: AdressSpace, sd):
+        return [I0P(I0P.I.NIL)]
+
+    def codeC(self, addressSpace: AdressSpace, sd):
+        return self.codeV(addressSpace, sd)
+
+    def pretty_print(self, indent):
+        space = "  " * indent
+        return f"{space}[]"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        return set()
+
+
+class Cons(ASTNode):
+    def __init__(self, head: ASTNode, tail: ASTNode):
+        self.head = head
+        self.tail = tail
+
+    def codeV(self, addressSpace: AdressSpace, sd):
+        if (CALL_TYPE == "CBV"):
+            return [*self.head.codeV(addressSpace, sd), *self.tail.codeV(addressSpace, sd+1), I0P(I0P.I.CONS)]
+        elif (CALL_TYPE == "CBN"):
+            return [*self.head.codeC(addressSpace, sd), *self.tail.codeC(addressSpace, sd+1), I0P(I0P.I.CONS)]
+
+    def codeC(self, addressSpace: AdressSpace, sd):
+        return self.codeV(addressSpace, sd)
+
+    def pretty_print(self, indent):
+        space = "  " * indent
+        return f"{space}({self.head} :: {self.tail})"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        return self.head.getFreeVariables(boundVars).union(self.tail.getFreeVariables(boundVars))
+
+
+class Print(ASTNode):
+    def __init__(self, node: ASTNode):
+        self.node = node
+
+    def codeV(self, addressSpace: AdressSpace, sd):
+        return [*self.node.codeB(addressSpace, sd), I0P(I0P.I.PRINT), I1P(I1P.I.SLIDE, 1), I1P(I1P.I.MKVEC, 0)]
+
+    def pretty_print(self, indent):
+        space = "  " * indent
+        return f"{space} print {self.node}"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        return self.node.getFreeVariables(boundVars)
 
 
 class UnaryOperator(ASTNode):
@@ -179,7 +234,7 @@ class LetIn(ASTNode):
         for (var, expr) in self.variables:
             new_bound_vars.add(var.name)
         for (var, expr) in self.variables:
-            s1.union(expr.getFreeVariables(boundVars))
+            s1 = s1.union(expr.getFreeVariables(boundVars))
 
         s2 = self.body.getFreeVariables(new_bound_vars)
 
@@ -196,7 +251,7 @@ class Fun(ASTNode):
 
         z = self.getFreeVariables(set())
 
-        newaddressSpace = {}
+        newaddressSpace = addressSpace.copy()
 
         code = []
         for i, var in enumerate(z):
@@ -218,7 +273,7 @@ class Fun(ASTNode):
 
     def pretty_print(self, indent=0):
         space = "  " * indent
-        return f"{space}fun {', '.join([var.pretty_print(0) for var in self.variables])} -> {self.body}"
+        return f"{space}(fun {', '.join([var.pretty_print(0) for var in self.variables])} -> {self.body})"
 
     def getFreeVariables(self, boundVars: set[str]) -> set[str]:
         new_bound_vars = set().union(boundVars)
@@ -257,7 +312,7 @@ class Apply(ASTNode):
         s = self.func.getFreeVariables(boundVars)
 
         for p in self.params:
-            s.union(p.getFreeVariables(boundVars))
+            s = s.union(p.getFreeVariables(boundVars))
 
         return s
 
@@ -305,9 +360,124 @@ class LetRecIn(ASTNode):
         s1 = set()
         new_bound_vars = set().union(boundVars)
         for (var, expr) in self.variables:
-            s1.union(expr.getFreeVariables(boundVars))
+            s1 = s1.union(expr.getFreeVariables(boundVars))
             new_bound_vars.add(var)
 
         s2 = self.body.getFreeVariables(new_bound_vars)
 
         return s1.union(s2)
+
+
+class Tuple(ASTNode):
+
+    def __init__(self, elements: List[ASTNode]):
+        self.elements = elements
+
+    def codeV(self, addressSpace: AdressSpace, sd):
+        code = []
+        for i, e in enumerate(self.elements):
+            if (CALL_TYPE == "CBV"):
+                code += e.codeV(addressSpace, sd+i)
+            elif (CALL_TYPE == "CBN"):
+                code += e.codeC(addressSpace, sd+i)
+
+        return [*code, I1P(I1P.I.MKVEC, len(self.elements))]
+
+    def codeC(self, addressSpace: AdressSpace, sd):
+        return self.codeV(addressSpace, sd)
+
+    def pretty_print(self, indent=0):
+        space = "  " * indent
+        return f"{space}({', '.join([e.pretty_print(0) for e in self.elements])})"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        s = set()
+        for e in self.elements:
+            s = s.union(e.getFreeVariables(boundVars))
+
+        return s
+
+
+class TupleAccess(ASTNode):
+
+    def __init__(self, tuple_: ASTNode, index: int, ):
+        self.tuple = tuple_
+        self.index = index
+
+    def codeV(self, addressSpace: AdressSpace, sd):
+        return [*self.tuple.codeV(addressSpace, sd), I1P(I1P.I.GET, self.index), I0P(I0P.I.EVAL)]
+
+    def pretty_print(self, indent=0):
+        space = "  " * indent
+        return f"{space}(#{self.index} {self.tuple})"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        return self.tuple.getFreeVariables(boundVars)
+
+
+class DeconstructTuple(ASTNode):
+
+    def __init__(self,  variables: List[Variable], tuple_: ASTNode, body: ASTNode):
+        self.variables = variables
+        self.tuple = tuple_
+        self.body = body
+
+    def codeV(self, addressSpace: AdressSpace, sd):
+        newaddressSpace = addressSpace.copy()
+
+        for i, var in enumerate(self.variables):
+            newaddressSpace[var.name] = ('L', sd+i+1)
+
+        return [*self.tuple.codeV(addressSpace, sd), I1P(I1P.I.GETVEC, len(self.variables)), *self.body.codeV(newaddressSpace, sd+len(self.variables)), I1P(I1P.I.SLIDE, len(self.variables))]
+
+    def pretty_print(self, indent=0):
+        space = "  " * indent
+        return f"{space}let ({', '.join([var.pretty_print(0) for var in self.variables])} = {self.tuple} in {self.body})"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        s1 = set()
+        new_bound_vars = set().union(boundVars)
+        for var in self.variables:
+            new_bound_vars.add(var.name)
+        s1 = s1.union(self.tuple.getFreeVariables(boundVars))
+        s2 = self.body.getFreeVariables(new_bound_vars)
+
+        return s1.union(s2)
+
+
+class MatchList(ASTNode):
+
+    def __init__(self, list_: ASTNode, nil_case: ASTNode, cons_variables: List[Variable],
+                 cons_case: ASTNode):
+        self.list = list_
+        self.nil_case = nil_case
+        self.cons_variables = cons_variables
+        self.cons_case = cons_case
+
+    def codeV(self, addressSpace: AdressSpace, sd):
+        A = label_generator()
+        B = label_generator()
+
+        newAddressspace = addressSpace.copy()
+
+        for i, var in enumerate(self.cons_variables):
+            newAddressspace[var.name] = ('L', sd+i+1)
+
+        return [*self.list.codeV(addressSpace, sd), I1P(I1P.I.TLIST, A), *self.nil_case.codeV(addressSpace, sd), I1P(I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A),
+                *self.cons_case.codeV(newAddressspace, sd+2),                I1P(I1P.I.SLIDE, 2), I1P(I1P.I.JUMP_TARGET, B)]
+
+    def pretty_print(self, indent=0):
+        space = "  " * indent
+        return f"{space}match {self.list} with [] -> {self.nil_case} | {self.cons_variables[0]} :: {self.cons_variables[1]} -> {self.cons_case}"
+
+    def getFreeVariables(self, boundVars: set[str]) -> set[str]:
+        s1 = set()
+        s1 = s1.union(self.list.getFreeVariables(boundVars))
+        s1 = s1.union(self.nil_case.getFreeVariables(boundVars))
+
+        new_bound_vars = set().union(boundVars)
+        for var in self.cons_variables:
+            new_bound_vars.add(var.name)
+        s1 = s1.union(self.cons_case.getFreeVariables(new_bound_vars))
+
+        return s1
