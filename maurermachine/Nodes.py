@@ -1,7 +1,7 @@
 import random
 import string
 from typing import Any, List
-from ASTNode import ASTNode, label_generator, getvar
+from ASTNode import ASTNode, CompilationResult, label_generator, getvar, makeCompilationResult
 from Instructions import Instructions0Params as I0P
 from enum import Enum
 from Instructions import Instructions1Params as I1P, bcolors
@@ -19,13 +19,18 @@ class BaseType(ASTNode):
         self.value = value
 
     def codeB(self, addressSpace: AdressSpace, sd):
-        return [I1P(I1P.I.LOADC, self.value)]
+        code = [I1P(I1P.I.LOADC, self.value)]
+
+        return makeCompilationResult(code, f"BaseType B({self.value})", self)
 
     def codeV(self, addressSpace: AdressSpace, sd):
-        return [I1P(I1P.I.LOADC, self.value), I0P(I0P.I.MKBASIC)]
+        code = [I1P(I1P.I.LOADC, self.value),
+                I0P(I0P.I.MKBASIC)]
+
+        return makeCompilationResult(code,  f"BaseType V({self.value})", self)
 
     def codeC(self, addressSpace: AdressSpace, sd):
-        return self.codeV(addressSpace, sd)
+        return makeCompilationResult(self.codeV(addressSpace, sd),  f"BaseType C({self.value})", self)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -40,10 +45,14 @@ class Variable(ASTNode):
         self.name = name
 
     def codeV(self, addressSpace: AdressSpace, sd):
-        return [*getvar(self.name, addressSpace, sd), I0P(I0P.I.EVAL)]
+        code = [*getvar(self.name, addressSpace, sd), I0P(I0P.I.EVAL)]
+
+        return makeCompilationResult(code,  f"Variable V({self.name})", self)
 
     def codeC(self, addressSpace: AdressSpace, sd):
-        return getvar(self.name, addressSpace, sd)
+        code = getvar(self.name, addressSpace, sd)
+
+        return makeCompilationResult(code,  f"Variable C({self.name})", self)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -61,10 +70,14 @@ class Nil(ASTNode):
         pass
 
     def codeV(self, addressSpace: AdressSpace, sd):
-        return [I0P(I0P.I.NIL)]
+        code = [I0P(I0P.I.NIL)]
+
+        return makeCompilationResult(code,  "Nil V", self)
 
     def codeC(self, addressSpace: AdressSpace, sd):
-        return self.codeV(addressSpace, sd)
+        code = self.codeV(addressSpace, sd)
+
+        return makeCompilationResult(code,  "Nil C", self)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -81,12 +94,21 @@ class Cons(ASTNode):
 
     def codeV(self, addressSpace: AdressSpace, sd):
         if (CALL_TYPE == "CBV"):
-            return [*self.head.codeV(addressSpace, sd), *self.tail.codeV(addressSpace, sd+1), I0P(I0P.I.CONS)]
+            head = self.head.codeV(addressSpace, sd)
+            tail = self.tail.codeV(addressSpace, sd+1)
         elif (CALL_TYPE == "CBN"):
-            return [*self.head.codeC(addressSpace, sd), *self.tail.codeC(addressSpace, sd+1), I0P(I0P.I.CONS)]
+            head = self.head.codeC(addressSpace, sd)
+            tail = self.tail.codeC(addressSpace, sd+1)
+        else:
+            raise Exception("CALL_TYPE not set")
+
+        code = [head, tail, I0P(I0P.I.CONS)]
+        return makeCompilationResult(code, f"Cons V({self.head} :: {self.tail}) {CALL_TYPE}", self)
 
     def codeC(self, addressSpace: AdressSpace, sd):
-        return self.codeV(addressSpace, sd)
+        code = self.codeV(addressSpace, sd)
+
+        return makeCompilationResult(code, f"Cons C({self.head} :: {self.tail})", self)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -101,7 +123,12 @@ class Print(ASTNode):
         self.node = node
 
     def codeV(self, addressSpace: AdressSpace, sd):
-        return [*self.node.codeB(addressSpace, sd), I0P(I0P.I.PRINT), I1P(I1P.I.SLIDE, 1), I1P(I1P.I.MKVEC, 0)]
+        body = self.node.codeB(addressSpace, sd)
+
+        code = [body, I0P(I0P.I.PRINT),
+                I1P(I1P.I.SLIDE, 1), I1P(I1P.I.MKVEC, 0)]
+
+        return makeCompilationResult(code, f"Print V({self.node})", self)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -118,10 +145,16 @@ class UnaryOperator(ASTNode):
         self.node = node
 
     def codeB(self, addressSpace: AdressSpace, sd):
-        return [*self.node.codeB(addressSpace, sd), I0P(self.operator)]
+        body = self.node.codeB(addressSpace, sd)
+
+        code = [body, I0P(self.operator)]
+        return makeCompilationResult(code, f"UnaryOperator B({self.operator} {self.node})", self)
 
     def codeV(self, addressSpace: AdressSpace, sd):
-        return [*self.node.codeB(addressSpace, sd), I0P(self.operator), I0P(I0P.I.MKBASIC)]
+        body = self.node.codeB(addressSpace, sd)
+
+        code = [body, I0P(self.operator), I0P(I0P.I.MKBASIC)]
+        return makeCompilationResult(code, f"UnaryOperator V({self.operator} {self.node})", self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -139,10 +172,20 @@ class BinaryOperation(ASTNode):
         self.right = right
 
     def codeB(self, addressSpace: AdressSpace, sd):
-        return [*self.left.codeB(addressSpace, sd), *self.right.codeB(addressSpace, sd+1), I0P(self.operator)]
+        left = self.left.codeB(addressSpace, sd)
+        right = self.right.codeB(addressSpace, sd+1)
+
+        code = [left, right, I0P(self.operator)]
+
+        return makeCompilationResult(code, f"BinaryOperation B", self)
 
     def codeV(self, addressSpace: AdressSpace, sd):
-        return [*self.left.codeB(addressSpace, sd), *self.right.codeB(addressSpace, sd+1), I0P(self.operator), I0P(I0P.I.MKBASIC)]
+        left = self.left.codeB(addressSpace, sd)
+        right = self.right.codeB(addressSpace, sd+1)
+
+        code = [left, right, I0P(self.operator), I0P(I0P.I.MKBASIC)]
+
+        return makeCompilationResult(code, f"BinaryOperation V", self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -162,28 +205,42 @@ class IfThenElse(ASTNode):
     def codeB(self, addressSpace: AdressSpace, sd):
         A = label_generator()
         B = label_generator()
-        return [
-            *self.condition.codeB(addressSpace, sd),
+
+        cond = self.condition.codeB(addressSpace, sd)
+        then = self.then.codeB(addressSpace, sd)
+        else_ = self.else_.codeB(addressSpace, sd)
+
+        code = [
+            cond,
             I1P(I1P.I.JUMPZ, A),
-            *self.then.codeB(addressSpace, sd),
+            then,
             I1P(I1P.I.JUMP, B),
             I1P(I1P.I.JUMP_TARGET, A),
-            *self.else_.codeB(addressSpace, sd),
+            else_,
             I1P(I1P.I.JUMP_TARGET, B)
         ]
+
+        return makeCompilationResult(code, f"IfThenElse B", self)
 
     def codeV(self, addressSpace: AdressSpace, sd):
         A = label_generator()
         B = label_generator()
-        return [
-            *self.condition.codeB(addressSpace, sd),
+
+        cond = self.condition.codeB(addressSpace, sd)
+        then = self.then.codeV(addressSpace, sd)
+        else_ = self.else_.codeV(addressSpace, sd)
+
+        code = [
+            cond,
             I1P(I1P.I.JUMPZ, A),
-            *self.then.codeV(addressSpace, sd),
+            then,
             I1P(I1P.I.JUMP, B),
             I1P(I1P.I.JUMP_TARGET, A),
-            *self.else_.codeV(addressSpace, sd),
+            else_,
             I1P(I1P.I.JUMP_TARGET, B)
         ]
+
+        return makeCompilationResult(code, f"IfThenElse V", self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -202,15 +259,27 @@ class LetIn(ASTNode):
     def codeV(self, addressSpace: AdressSpace, sd):
         newaddressSpace = addressSpace.copy()
 
-        code = []
+        declar_variables = []
         for i, (var, expr) in enumerate(self.variables):
             if (CALL_TYPE == "CBV"):
-                code += expr.codeV(newaddressSpace, sd+i)
+                var_i = expr.codeV(newaddressSpace, sd+i)
             elif (CALL_TYPE == "CBN"):
-                code += expr.codeC(newaddressSpace, sd+i)
+                var_i = expr.codeC(newaddressSpace, sd+i)
+            else:
+                raise Exception("CALL_TYPE not set")
+
+            declar_variables.append(var_i)
+
             newaddressSpace[var.name] = ("L", sd+i+1)
 
-        return [*code,  *self.body.codeV(newaddressSpace, sd+len(self.variables)), I1P(I1P.I.SLIDE, len(self.variables))]
+        body = self.body.codeV(
+            newaddressSpace, sd+len(self.variables))
+
+        code = [
+            makeCompilationResult(declar_variables, f"Params", None),  body,
+            I1P(I1P.I.SLIDE, len(self.variables))]
+
+        return makeCompilationResult(code, f"LetIn V", self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -253,9 +322,12 @@ class Fun(ASTNode):
 
         newaddressSpace = addressSpace.copy()
 
-        code = []
+        declare_variables = []
         for i, var in enumerate(z):
-            code += getvar(var, addressSpace, sd+i)
+            var_i = getvar(var, addressSpace, sd+i)
+
+            declare_variables.append(*var_i)
+
             newaddressSpace[var] = ('G', i)
 
         for i, var in enumerate(self.variables):
@@ -266,10 +338,14 @@ class Fun(ASTNode):
 
         k = len(self.variables)
 
-        return [*code, I1P(I1P.I.MKVEC, len(z)), I1P(I1P.I.MKFUNVAL, A), I1P(I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A), I1P(I1P.I.TARG, k),  *self.body.codeV(newaddressSpace, 0), I1P(I1P.I.RETURN, k), I1P(I1P.I.JUMP_TARGET, B)]
+        code = [
+            makeCompilationResult(declare_variables, f"Globals", None), I1P(I1P.I.MKVEC, len(z)), I1P(I1P.I.MKFUNVAL, A), I1P(I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A), I1P(
+                I1P.I.TARG, k),  self.body.codeV(newaddressSpace, 0), I1P(I1P.I.RETURN, k), I1P(I1P.I.JUMP_TARGET, B)]
+
+        return makeCompilationResult(code, f"Fun V", self)
 
     def codeC(self, addressSpace: AdressSpace, sd):
-        return self.codeV(addressSpace, sd)
+        return makeCompilationResult(self.codeV(addressSpace, sd), f"Fun C", self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -291,18 +367,23 @@ class Apply(ASTNode):
 
     def codeV(self, addressSpace: AdressSpace, sd):
 
-        code = []
+        paramsCode = []
         for i, p in enumerate(reversed(self.params)):
             if (CALL_TYPE == "CBV"):
-                code += p.codeV(addressSpace, sd+3+i)
+                paramsCode.append(p.codeV(addressSpace, sd+3+i))
             elif (CALL_TYPE == "CBN"):
-                code += p.codeC(addressSpace, sd+3+i)
+                paramsCode.append(p.codeC(addressSpace, sd+3+i))
 
-        code += self.func.codeV(addressSpace, sd+len(self.params) + 3)
+        func = self.func.codeV(addressSpace, sd+len(self.params) + 3)
 
         A = label_generator()
 
-        return [I1P(I1P.I.MARK, A), *code, I0P(I0P.I.APPLY), I1P(I1P.I.JUMP_TARGET, A)]
+        code = [I1P(I1P.I.MARK, A),
+                makeCompilationResult(
+                    paramsCode, f"Params", self), func, I0P(I0P.I.APPLY),
+                I1P(I1P.I.JUMP_TARGET, A)]
+
+        return makeCompilationResult(code, f"Apply V", self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -329,17 +410,23 @@ class LetRecIn(ASTNode):
         for i, (var, expr) in enumerate(self.variables):
             newaddressSpace[var.name] = ('L', sd+i+1)
 
-        code = []
+        params = []
         for i, (var, expr) in enumerate(self.variables):
             if (CALL_TYPE == "CBV"):
-                code += expr.codeV(newaddressSpace, sd+len(self.variables))
+                params.append(expr.codeV(
+                    newaddressSpace, sd+len(self.variables)))
             elif (CALL_TYPE == "CBN"):
-                code += expr.codeC(newaddressSpace, sd+len(self.variables))
-            code += [I1P(I1P.I.REWRITE, len(self.variables)-i)]
+                params.append(expr.codeC(
+                    newaddressSpace, sd+len(self.variables)))
+            params += [I1P(I1P.I.REWRITE, len(self.variables)-i)]
 
-        code += [*self.body.codeV(newaddressSpace, sd+len(self.variables))]
+        body = self.body.codeV(newaddressSpace, sd+len(self.variables))
 
-        return [I1P(I1P.I.ALLOC, len(self.variables)), *code, I1P(I1P.I.SLIDE, len(self.variables))]
+        code = [I1P(I1P.I.ALLOC, len(self.variables)),
+                makeCompilationResult(params, f"Params", None),
+                body, I1P(I1P.I.SLIDE, len(self.variables))]
+
+        return makeCompilationResult(code, f"LetRecIn V", self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -374,17 +461,20 @@ class Tuple(ASTNode):
         self.elements = elements
 
     def codeV(self, addressSpace: AdressSpace, sd):
-        code = []
+        params = []
         for i, e in enumerate(self.elements):
             if (CALL_TYPE == "CBV"):
-                code += e.codeV(addressSpace, sd+i)
+                params.append(e.codeV(addressSpace, sd+i))
             elif (CALL_TYPE == "CBN"):
-                code += e.codeC(addressSpace, sd+i)
+                params.append(e.codeC(addressSpace, sd+i))
 
-        return [*code, I1P(I1P.I.MKVEC, len(self.elements))]
+        code = [
+            makeCompilationResult(params, f"Params", None), I1P(I1P.I.MKVEC, len(self.elements))]
+
+        return makeCompilationResult(code, f"Tuple V", self)
 
     def codeC(self, addressSpace: AdressSpace, sd):
-        return self.codeV(addressSpace, sd)
+        return makeCompilationResult(self.codeV(addressSpace, sd), f"Tuple C", self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -405,7 +495,10 @@ class TupleAccess(ASTNode):
         self.index = index
 
     def codeV(self, addressSpace: AdressSpace, sd):
-        return [*self.tuple.codeV(addressSpace, sd), I1P(I1P.I.GET, self.index), I0P(I0P.I.EVAL)]
+        code = [self.tuple.codeV(addressSpace, sd), I1P(
+            I1P.I.GET, self.index), I0P(I0P.I.EVAL)]
+
+        return makeCompilationResult(code, f"TupleAccess V",    self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -428,7 +521,10 @@ class DeconstructTuple(ASTNode):
         for i, var in enumerate(self.variables):
             newaddressSpace[var.name] = ('L', sd+i+1)
 
-        return [*self.tuple.codeV(addressSpace, sd), I1P(I1P.I.GETVEC, len(self.variables)), *self.body.codeV(newaddressSpace, sd+len(self.variables)), I1P(I1P.I.SLIDE, len(self.variables))]
+        code = [self.tuple.codeV(addressSpace, sd), I1P(I1P.I.GETVEC, len(self.variables)), self.body.codeV(
+            newaddressSpace, sd+len(self.variables)), I1P(I1P.I.SLIDE, len(self.variables))]
+
+        return makeCompilationResult(code, f"DeconstructTuple V", self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent
@@ -463,8 +559,10 @@ class MatchList(ASTNode):
         for i, var in enumerate(self.cons_variables):
             newAddressspace[var.name] = ('L', sd+i+1)
 
-        return [*self.list.codeV(addressSpace, sd), I1P(I1P.I.TLIST, A), *self.nil_case.codeV(addressSpace, sd), I1P(I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A),
-                *self.cons_case.codeV(newAddressspace, sd+2),                I1P(I1P.I.SLIDE, 2), I1P(I1P.I.JUMP_TARGET, B)]
+        code = [self.list.codeV(addressSpace, sd), I1P(I1P.I.TLIST, A), self.nil_case.codeV(addressSpace, sd), I1P(I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A),
+                self.cons_case.codeV(newAddressspace, sd+2),                I1P(I1P.I.SLIDE, 2), I1P(I1P.I.JUMP_TARGET, B)]
+
+        return makeCompilationResult(code, f"MatchList V", self)
 
     def pretty_print(self, indent=0):
         space = "  " * indent

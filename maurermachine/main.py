@@ -55,11 +55,19 @@ if __name__ == '__main__':
     )
 
     variable_adress: dict[str, (chr, int)] = {
+
     }
 
     print(expr, "\n")
 
-    code = expr.codeV(variable_adress, 0)
+    comp_result = expr.codeV(variable_adress, 0)
+
+    comp_result_json = comp_result.to_json()
+
+    with open("comp_result.json", "w") as f:
+        f.write(comp_result_json)
+
+    code = comp_result.to_code()
 
     print(f"Code: [{len(code)} instructions]\n{code}\n")
 

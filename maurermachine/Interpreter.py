@@ -268,7 +268,8 @@ class Interpreter:
                     print()
 
             if step % 10 == 0:
-                self.heap.collect_garbage(self.stack)
+                # self.heap.collect_garbage(self.stack)
+                pass
 
             step += 1
 

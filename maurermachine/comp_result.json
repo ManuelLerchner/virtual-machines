@@ -1,0 +1,525 @@
+{
+    "description": "LetRecIn V",
+    "description_node": "\nlet rec app = ((fun l, y -> match l with [] -> y | h :: t -> (h :: app t y)) in\n\n  let rec   map = ((fun f, l -> match l with [] -> [] | h :: t -> (f h :: map f t)) in\n    map (fun x ->  print x) map (fun x -> (x * x)) app (1 :: (2 :: (3 :: []))) (4 :: (5 :: (6 :: [])))))",
+    "code": [
+        "ALLOC 1",
+        {
+            "description": "Params",
+            "description_node": null,
+            "code": [
+                {
+                    "description": "Fun V",
+                    "description_node": "(fun l, y -> match l with [] -> y | h :: t -> (h :: app t y))",
+                    "code": [
+                        {
+                            "description": "Globals",
+                            "description_node": null,
+                            "code": [
+                                "PUSHLOC 0"
+                            ]
+                        },
+                        "MKVEC 1",
+                        "MKFUNVAL a",
+                        "JUMP b",
+                        "JUMP_TARGET a",
+                        "TARG 2",
+                        {
+                            "description": "MatchList V",
+                            "description_node": "match l with [] -> y | h :: t -> (h :: app t y)",
+                            "code": [
+                                {
+                                    "description": "Variable V(l)",
+                                    "description_node": "l",
+                                    "code": [
+                                        "PUSHLOC 0",
+                                        "eval"
+                                    ]
+                                },
+                                "TLIST c",
+                                {
+                                    "description": "Variable V(y)",
+                                    "description_node": "y",
+                                    "code": [
+                                        "PUSHLOC 1",
+                                        "eval"
+                                    ]
+                                },
+                                "JUMP d",
+                                "JUMP_TARGET c",
+                                {
+                                    "description": "Cons V(h :: app t y) CBV",
+                                    "description_node": "(h :: app t y)",
+                                    "code": [
+                                        {
+                                            "description": "Variable V(h)",
+                                            "description_node": "h",
+                                            "code": [
+                                                "PUSHLOC 1",
+                                                "eval"
+                                            ]
+                                        },
+                                        {
+                                            "description": "Apply V",
+                                            "description_node": "app t y",
+                                            "code": [
+                                                "MARK e",
+                                                {
+                                                    "description": "Params",
+                                                    "description_node": "app t y",
+                                                    "code": [
+                                                        {
+                                                            "description": "Variable V(y)",
+                                                            "description_node": "y",
+                                                            "code": [
+                                                                "PUSHLOC 7",
+                                                                "eval"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "description": "Variable V(t)",
+                                                            "description_node": "t",
+                                                            "code": [
+                                                                "PUSHLOC 5",
+                                                                "eval"
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "description": "Variable V(app)",
+                                                    "description_node": "app",
+                                                    "code": [
+                                                        "PUSHGLOB 0",
+                                                        "eval"
+                                                    ]
+                                                },
+                                                "apply",
+                                                "JUMP_TARGET e"
+                                            ]
+                                        },
+                                        "cons"
+                                    ]
+                                },
+                                "SLIDE 2",
+                                "JUMP_TARGET d"
+                            ]
+                        },
+                        "RETURN 2",
+                        "JUMP_TARGET b"
+                    ]
+                },
+                "REWRITE 1"
+            ]
+        },
+        {
+            "description": "LetRecIn V",
+            "description_node": "\nlet rec map = ((fun f, l -> match l with [] -> [] | h :: t -> (f h :: map f t)) in\n  map (fun x ->  print x) map (fun x -> (x * x)) app (1 :: (2 :: (3 :: []))) (4 :: (5 :: (6 :: []))))",
+            "code": [
+                "ALLOC 1",
+                {
+                    "description": "Params",
+                    "description_node": null,
+                    "code": [
+                        {
+                            "description": "Fun V",
+                            "description_node": "(fun f, l -> match l with [] -> [] | h :: t -> (f h :: map f t))",
+                            "code": [
+                                {
+                                    "description": "Globals",
+                                    "description_node": null,
+                                    "code": [
+                                        "PUSHLOC 0"
+                                    ]
+                                },
+                                "MKVEC 1",
+                                "MKFUNVAL f",
+                                "JUMP g",
+                                "JUMP_TARGET f",
+                                "TARG 2",
+                                {
+                                    "description": "MatchList V",
+                                    "description_node": "match l with [] -> [] | h :: t -> (f h :: map f t)",
+                                    "code": [
+                                        {
+                                            "description": "Variable V(l)",
+                                            "description_node": "l",
+                                            "code": [
+                                                "PUSHLOC 1",
+                                                "eval"
+                                            ]
+                                        },
+                                        "TLIST h",
+                                        {
+                                            "description": "Nil V",
+                                            "description_node": "[]",
+                                            "code": [
+                                                "nil"
+                                            ]
+                                        },
+                                        "JUMP i",
+                                        "JUMP_TARGET h",
+                                        {
+                                            "description": "Cons V(f h :: map f t) CBV",
+                                            "description_node": "(f h :: map f t)",
+                                            "code": [
+                                                {
+                                                    "description": "Apply V",
+                                                    "description_node": "f h",
+                                                    "code": [
+                                                        "MARK j",
+                                                        {
+                                                            "description": "Params",
+                                                            "description_node": "f h",
+                                                            "code": [
+                                                                {
+                                                                    "description": "Variable V(h)",
+                                                                    "description_node": "h",
+                                                                    "code": [
+                                                                        "PUSHLOC 4",
+                                                                        "eval"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "description": "Variable V(f)",
+                                                            "description_node": "f",
+                                                            "code": [
+                                                                "PUSHLOC 6",
+                                                                "eval"
+                                                            ]
+                                                        },
+                                                        "apply",
+                                                        "JUMP_TARGET j"
+                                                    ]
+                                                },
+                                                {
+                                                    "description": "Apply V",
+                                                    "description_node": "map f t",
+                                                    "code": [
+                                                        "MARK k",
+                                                        {
+                                                            "description": "Params",
+                                                            "description_node": "map f t",
+                                                            "code": [
+                                                                {
+                                                                    "description": "Variable V(t)",
+                                                                    "description_node": "t",
+                                                                    "code": [
+                                                                        "PUSHLOC 4",
+                                                                        "eval"
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "description": "Variable V(f)",
+                                                                    "description_node": "f",
+                                                                    "code": [
+                                                                        "PUSHLOC 7",
+                                                                        "eval"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "description": "Variable V(map)",
+                                                            "description_node": "map",
+                                                            "code": [
+                                                                "PUSHGLOB 0",
+                                                                "eval"
+                                                            ]
+                                                        },
+                                                        "apply",
+                                                        "JUMP_TARGET k"
+                                                    ]
+                                                },
+                                                "cons"
+                                            ]
+                                        },
+                                        "SLIDE 2",
+                                        "JUMP_TARGET i"
+                                    ]
+                                },
+                                "RETURN 2",
+                                "JUMP_TARGET g"
+                            ]
+                        },
+                        "REWRITE 1"
+                    ]
+                },
+                {
+                    "description": "Apply V",
+                    "description_node": "map (fun x ->  print x) map (fun x -> (x * x)) app (1 :: (2 :: (3 :: []))) (4 :: (5 :: (6 :: [])))",
+                    "code": [
+                        "MARK r",
+                        {
+                            "description": "Params",
+                            "description_node": "map (fun x ->  print x) map (fun x -> (x * x)) app (1 :: (2 :: (3 :: []))) (4 :: (5 :: (6 :: [])))",
+                            "code": [
+                                {
+                                    "description": "Apply V",
+                                    "description_node": "map (fun x -> (x * x)) app (1 :: (2 :: (3 :: []))) (4 :: (5 :: (6 :: [])))",
+                                    "code": [
+                                        "MARK o",
+                                        {
+                                            "description": "Params",
+                                            "description_node": "map (fun x -> (x * x)) app (1 :: (2 :: (3 :: []))) (4 :: (5 :: (6 :: [])))",
+                                            "code": [
+                                                {
+                                                    "description": "Apply V",
+                                                    "description_node": "app (1 :: (2 :: (3 :: []))) (4 :: (5 :: (6 :: [])))",
+                                                    "code": [
+                                                        "MARK l",
+                                                        {
+                                                            "description": "Params",
+                                                            "description_node": "app (1 :: (2 :: (3 :: []))) (4 :: (5 :: (6 :: [])))",
+                                                            "code": [
+                                                                {
+                                                                    "description": "Cons V(4 :: (5 :: (6 :: []))) CBV",
+                                                                    "description_node": "(4 :: (5 :: (6 :: [])))",
+                                                                    "code": [
+                                                                        {
+                                                                            "description": "BaseType V(4)",
+                                                                            "description_node": "4",
+                                                                            "code": [
+                                                                                "LOADC 4",
+                                                                                "mkbasic"
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "description": "Cons V(5 :: (6 :: [])) CBV",
+                                                                            "description_node": "(5 :: (6 :: []))",
+                                                                            "code": [
+                                                                                {
+                                                                                    "description": "BaseType V(5)",
+                                                                                    "description_node": "5",
+                                                                                    "code": [
+                                                                                        "LOADC 5",
+                                                                                        "mkbasic"
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "description": "Cons V(6 :: []) CBV",
+                                                                                    "description_node": "(6 :: [])",
+                                                                                    "code": [
+                                                                                        {
+                                                                                            "description": "BaseType V(6)",
+                                                                                            "description_node": "6",
+                                                                                            "code": [
+                                                                                                "LOADC 6",
+                                                                                                "mkbasic"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "description": "Nil V",
+                                                                                            "description_node": "[]",
+                                                                                            "code": [
+                                                                                                "nil"
+                                                                                            ]
+                                                                                        },
+                                                                                        "cons"
+                                                                                    ]
+                                                                                },
+                                                                                "cons"
+                                                                            ]
+                                                                        },
+                                                                        "cons"
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "description": "Cons V(1 :: (2 :: (3 :: []))) CBV",
+                                                                    "description_node": "(1 :: (2 :: (3 :: [])))",
+                                                                    "code": [
+                                                                        {
+                                                                            "description": "BaseType V(1)",
+                                                                            "description_node": "1",
+                                                                            "code": [
+                                                                                "LOADC 1",
+                                                                                "mkbasic"
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "description": "Cons V(2 :: (3 :: [])) CBV",
+                                                                            "description_node": "(2 :: (3 :: []))",
+                                                                            "code": [
+                                                                                {
+                                                                                    "description": "BaseType V(2)",
+                                                                                    "description_node": "2",
+                                                                                    "code": [
+                                                                                        "LOADC 2",
+                                                                                        "mkbasic"
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "description": "Cons V(3 :: []) CBV",
+                                                                                    "description_node": "(3 :: [])",
+                                                                                    "code": [
+                                                                                        {
+                                                                                            "description": "BaseType V(3)",
+                                                                                            "description_node": "3",
+                                                                                            "code": [
+                                                                                                "LOADC 3",
+                                                                                                "mkbasic"
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "description": "Nil V",
+                                                                                            "description_node": "[]",
+                                                                                            "code": [
+                                                                                                "nil"
+                                                                                            ]
+                                                                                        },
+                                                                                        "cons"
+                                                                                    ]
+                                                                                },
+                                                                                "cons"
+                                                                            ]
+                                                                        },
+                                                                        "cons"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "description": "Variable V(app)",
+                                                            "description_node": "app",
+                                                            "code": [
+                                                                "PUSHLOC 12",
+                                                                "eval"
+                                                            ]
+                                                        },
+                                                        "apply",
+                                                        "JUMP_TARGET l"
+                                                    ]
+                                                },
+                                                {
+                                                    "description": "Fun V",
+                                                    "description_node": "(fun x -> (x * x))",
+                                                    "code": [
+                                                        {
+                                                            "description": "Globals",
+                                                            "description_node": null,
+                                                            "code": []
+                                                        },
+                                                        "MKVEC 0",
+                                                        "MKFUNVAL m",
+                                                        "JUMP n",
+                                                        "JUMP_TARGET m",
+                                                        "TARG 1",
+                                                        {
+                                                            "description": "BinaryOperation V",
+                                                            "description_node": "(x * x)",
+                                                            "code": [
+                                                                {
+                                                                    "description": "Base value",
+                                                                    "description_node": "x",
+                                                                    "code": [
+                                                                        {
+                                                                            "description": "Variable V(x)",
+                                                                            "description_node": "x",
+                                                                            "code": [
+                                                                                "PUSHLOC 0",
+                                                                                "eval"
+                                                                            ]
+                                                                        },
+                                                                        "getbasic"
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "description": "Base value",
+                                                                    "description_node": "x",
+                                                                    "code": [
+                                                                        {
+                                                                            "description": "Variable V(x)",
+                                                                            "description_node": "x",
+                                                                            "code": [
+                                                                                "PUSHLOC 1",
+                                                                                "eval"
+                                                                            ]
+                                                                        },
+                                                                        "getbasic"
+                                                                    ]
+                                                                },
+                                                                "*",
+                                                                "mkbasic"
+                                                            ]
+                                                        },
+                                                        "RETURN 1",
+                                                        "JUMP_TARGET n"
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "description": "Variable V(map)",
+                                            "description_node": "map",
+                                            "code": [
+                                                "PUSHLOC 8",
+                                                "eval"
+                                            ]
+                                        },
+                                        "apply",
+                                        "JUMP_TARGET o"
+                                    ]
+                                },
+                                {
+                                    "description": "Fun V",
+                                    "description_node": "(fun x ->  print x)",
+                                    "code": [
+                                        {
+                                            "description": "Globals",
+                                            "description_node": null,
+                                            "code": []
+                                        },
+                                        "MKVEC 0",
+                                        "MKFUNVAL p",
+                                        "JUMP q",
+                                        "JUMP_TARGET p",
+                                        "TARG 1",
+                                        {
+                                            "description": "Print V(x)",
+                                            "description_node": " print x",
+                                            "code": [
+                                                {
+                                                    "description": "Base value",
+                                                    "description_node": "x",
+                                                    "code": [
+                                                        {
+                                                            "description": "Variable V(x)",
+                                                            "description_node": "x",
+                                                            "code": [
+                                                                "PUSHLOC 0",
+                                                                "eval"
+                                                            ]
+                                                        },
+                                                        "getbasic"
+                                                    ]
+                                                },
+                                                "print",
+                                                "SLIDE 1",
+                                                "MKVEC 0"
+                                            ]
+                                        },
+                                        "RETURN 1",
+                                        "JUMP_TARGET q"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "description": "Variable V(map)",
+                            "description_node": "map",
+                            "code": [
+                                "PUSHLOC 5",
+                                "eval"
+                            ]
+                        },
+                        "apply",
+                        "JUMP_TARGET r"
+                    ]
+                },
+                "SLIDE 1"
+            ]
+        },
+        "SLIDE 1"
+    ]
+}
