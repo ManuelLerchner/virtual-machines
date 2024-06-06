@@ -365,4 +365,4 @@ class Program(ASTNode):
         return s
 
     def pretty_print(self, indent: int) -> str:
-        return f"{NEWLINE.join([pred.pretty_print(indent) for pred in self.predicates])}{NEWLINE}  ? {self.query.pretty_print(indent)}"
+        return f"{NEWLINE.join([pred.pretty_print(indent)+NEWLINE for pred in self.predicates])}{NEWLINE}  ? {self.query.pretty_print(indent)}"

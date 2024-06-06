@@ -1,0 +1,183 @@
+{
+    "description": "Program",
+    "description_node": "person(manuel) :- \nperson(maria) :- \nperson(jose) :- \nperson(luis) :- \nparent(manuel, maria) :- \nparent(manuel, jose) :- \nparent(maria, luis) :- \ngrandparent(X, Y) :- parent(X, Z), parent(Z, Y)\n  ? grandparent(X, Y)",
+    "code": [
+        "INIT A",
+        "PUSHENV 2",
+        {
+            "description": "Literal grandparent(X, Y)",
+            "description_node": "grandparent(X, Y)",
+            "code": [
+                "MARK B",
+                {
+                    "description": "Variable X",
+                    "description_node": "X",
+                    "code": [
+                        "PUTVAR 1"
+                    ]
+                },
+                {
+                    "description": "Variable Y",
+                    "description_node": "Y",
+                    "code": [
+                        "PUTVAR 2"
+                    ]
+                },
+                "CALL grandparent/2",
+                "JUMP_TARGET B"
+            ]
+        },
+        "HALT 2",
+        "JUMP_TARGET A",
+        "NO",
+        {
+            "description": "Predicate person/1",
+            "description_node": "person(manuel) :- \nperson(maria) :- \nperson(jose) :- \nperson(luis) :- ",
+            "code": [
+                "JUMP_TARGET person/1",
+                "SETBTP",
+                "TRY C",
+                "TRY D",
+                "TRY E",
+                "DELBTP",
+                "JUMP F",
+                "JUMP_TARGET C",
+                {
+                    "description": "Clause",
+                    "description_node": "person(manuel) :- ",
+                    "code": [
+                        "PUSHENV 1",
+                        "POPENV"
+                    ]
+                },
+                "JUMP_TARGET D",
+                {
+                    "description": "Clause",
+                    "description_node": "person(maria) :- ",
+                    "code": [
+                        "PUSHENV 1",
+                        "POPENV"
+                    ]
+                },
+                "JUMP_TARGET E",
+                {
+                    "description": "Clause",
+                    "description_node": "person(jose) :- ",
+                    "code": [
+                        "PUSHENV 1",
+                        "POPENV"
+                    ]
+                },
+                "JUMP_TARGET F",
+                {
+                    "description": "Clause",
+                    "description_node": "person(luis) :- ",
+                    "code": [
+                        "PUSHENV 1",
+                        "POPENV"
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "Predicate parent/2",
+            "description_node": "parent(manuel, maria) :- \nparent(manuel, jose) :- \nparent(maria, luis) :- ",
+            "code": [
+                "JUMP_TARGET parent/2",
+                "SETBTP",
+                "TRY G",
+                "TRY H",
+                "DELBTP",
+                "JUMP I",
+                "JUMP_TARGET G",
+                {
+                    "description": "Clause",
+                    "description_node": "parent(manuel, maria) :- ",
+                    "code": [
+                        "PUSHENV 2",
+                        "POPENV"
+                    ]
+                },
+                "JUMP_TARGET H",
+                {
+                    "description": "Clause",
+                    "description_node": "parent(manuel, jose) :- ",
+                    "code": [
+                        "PUSHENV 2",
+                        "POPENV"
+                    ]
+                },
+                "JUMP_TARGET I",
+                {
+                    "description": "Clause",
+                    "description_node": "parent(maria, luis) :- ",
+                    "code": [
+                        "PUSHENV 2",
+                        "POPENV"
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "Predicate grandparent/2",
+            "description_node": "grandparent(X, Y) :- parent(X, Z), parent(Z, Y)",
+            "code": [
+                "JUMP_TARGET grandparent/2",
+                {
+                    "description": "Clause",
+                    "description_node": "grandparent(X, Y) :- parent(X, Z), parent(Z, Y)",
+                    "code": [
+                        "PUSHENV 3",
+                        {
+                            "description": "Literal parent(X, Z)",
+                            "description_node": "parent(X, Z)",
+                            "code": [
+                                "MARK J",
+                                {
+                                    "description": "Variable X",
+                                    "description_node": "X",
+                                    "code": [
+                                        "PUTVAR 1"
+                                    ]
+                                },
+                                {
+                                    "description": "Variable Z",
+                                    "description_node": "Z",
+                                    "code": [
+                                        "PUTVAR 3"
+                                    ]
+                                },
+                                "CALL parent/2",
+                                "JUMP_TARGET J"
+                            ]
+                        },
+                        {
+                            "description": "Literal parent(Z, Y)",
+                            "description_node": "parent(Z, Y)",
+                            "code": [
+                                "MARK K",
+                                {
+                                    "description": "Variable Z",
+                                    "description_node": "Z",
+                                    "code": [
+                                        "PUTVAR 3"
+                                    ]
+                                },
+                                {
+                                    "description": "Variable Y",
+                                    "description_node": "Y",
+                                    "code": [
+                                        "PUTVAR 2"
+                                    ]
+                                },
+                                "CALL parent/2",
+                                "JUMP_TARGET K"
+                            ]
+                        },
+                        "POPENV"
+                    ]
+                }
+            ]
+        }
+    ]
+}

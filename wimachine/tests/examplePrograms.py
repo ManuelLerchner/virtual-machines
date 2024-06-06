@@ -1,6 +1,7 @@
 from Nodes import *
+from main import makeList
 
-a = Program(
+test = Program(
     [
         Predicate([
             Clause(Literal("t", [Variable("X")]), [
@@ -24,4 +25,32 @@ a = Program(
         ])
     ],
     Literal("p", [])
+)
+
+
+listcompose = Program(
+    [
+        Predicate([
+            Clause(Literal("app", [Variable("X"), Variable("Y"), Variable("Z")]), [
+                Unification(InitializedVariable("X"),
+                            Constructor("NIL", [])),
+                Unification(InitializedVariable("Y"),
+                            InitializedVariable("Z"))
+            ]),
+            Clause(Literal("app", [Variable("X"), Variable("Y"), Variable("Z")]), [
+                Unification(InitializedVariable("X"), Constructor(
+                    "CONS", [Variable("H"), Variable("X'")])),
+                Unification(InitializedVariable("Z"), Constructor(
+                    "CONS", [InitializedVariable("H"), Variable("Z'")])),
+                Literal("app", [InitializedVariable("X'"),
+                                InitializedVariable("Y"), InitializedVariable("Z'")])
+
+            ])
+        ]),
+    ],
+    Literal("app", [Variable("X"),
+                    Variable("Y"),
+                    makeList([Atom("a"), Atom("b"), Atom(
+                        "d"), Atom("e"), Atom("f")])
+                    ])
 )

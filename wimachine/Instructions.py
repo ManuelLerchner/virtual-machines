@@ -230,7 +230,7 @@ class Instructions1Params(Instructions):
             state.BP = state.FP
         elif self.instruction == Instructions1Params.I.HALT:
             # returns bindings of all self.param1 globals
-            for i in range(0, self.param1):
+            for i in range(self.param1-1, -1, -1):
                 adress = S[state.FP+i+1]
                 print(f">> X{i} = {H.pretty_print(adress)}")
             if self.param1 == 0:
