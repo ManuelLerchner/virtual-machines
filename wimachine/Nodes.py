@@ -7,8 +7,6 @@ from Instructions import Instructions1Params as I1P, bcolors
 
 NEWLINE = "\n"
 
-AdressSpace = dict[str, (chr, int)]
-
 
 def check(ivars: set[str], addressSpace: dict[str, int]) -> I1P:
     code = []
@@ -26,7 +24,7 @@ class Atom(ASTNode):
         code = [I1P(I1P.I.PUTATOM, self.a)]
         return makeCompilationResult(code, f"Atom {self.a}", self)
 
-    def codeU(self, addressSpace: dict[str, int]) -> CompilationResult:
+    def codeU(self, addressSpace) -> CompilationResult:
         code = [I1P(I1P.I.UATOM, self.a)]
         return makeCompilationResult(code, f"CodeU Atom {self.a}", self)
 
@@ -178,9 +176,6 @@ class Literal(ASTNode):
 
         return makeCompilationResult(code, f"Literal {self.p}({', '.join([arg.pretty_print(0) for arg in self.args])})", self)
 
-    def codeU(self, addressSpace: dict[str, int]) -> CompilationResult:
-        pass
-
     def ivars(self) -> set[str]:
         ivars = set()
         for arg in self.args:
@@ -224,9 +219,6 @@ class Unification(ASTNode):
     def locals(self) -> set[str]:
         return self.left.locals().union(self.right.locals())
 
-    def codeU(self, addressSpace: dict[str, int]) -> CompilationResult:
-        pass
-
     def pretty_print(self, indent: int) -> str:
         return f"{self.left.pretty_print(indent)} = {self.right.pretty_print(indent)}"
 
@@ -267,9 +259,6 @@ class Clause(ASTNode):
         for goal in self.goals:
             s = s.union(goal.locals())
         return s
-
-    def codeU(self, addressSpace: dict[str, int]) -> CompilationResult:
-        pass
 
     def pretty_print(self, indent: int) -> str:
         return f"{self.head.pretty_print(indent)} :- {', '.join([node.pretty_print(indent) for node in self.goals])}"
@@ -319,9 +308,6 @@ class Predicate(ASTNode):
             s = s.union(clause.locals())
         return s
 
-    def codeU(self, addressSpace: dict[str, int]) -> CompilationResult:
-        pass
-
     def pretty_print(self, indent: int) -> str:
         return f"{NEWLINE.join([clause.pretty_print(indent) for clause in self.clauses])}"
 
@@ -331,7 +317,7 @@ class Program(ASTNode):
         self.predicates = predicates
         self.query = query
 
-    def codeP(self) -> CompilationResult:
+    def code(self) -> CompilationResult:
         A = label_generator()
 
         free_vars = self.query.locals()

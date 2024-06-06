@@ -187,7 +187,7 @@ if __name__ == '__main__':
 
     print(expr, "\n")
 
-    comp_result = expr.codeP()
+    comp_result = expr.code()
     comp_result_json = comp_result.to_json()
 
     with open("comp_result.json", "w") as f:

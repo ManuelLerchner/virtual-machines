@@ -96,32 +96,38 @@ class ASTNode(metaclass=ABCMeta):
     # @abstractmethod
     def codeA(self, addressSpace: dict[str, int]) -> CompilationResult:
         """
-        Compute value store it in the heap, returns reference on stack
+        Computes the Node in the heap, returns reference on stack
         """
         pass
 
     # @abstractmethod
     def codeG(self, addressSpace: dict[str, int]) -> CompilationResult:
         """
-        Compute value store it in the heap, returns reference on stack
+        Allocates a stack frame, construct the parameters, and jumps to the predicate
         """
         pass
 
     def codeU(self, addressSpace: dict[str, int]) -> CompilationResult:
         """
-        Compute value store it in the heap, returns reference on stack
+        Performs a unification with the element on the top of the stack
         """
         pass
 
     def codeC(self) -> CompilationResult:
         """
-        Compile clause
+        Makes code for a clause. Allocate a stack space for locals, evaluate the body, and free the stack space
         """
         pass
 
     def codeP(self) -> CompilationResult:
         """
-        Compile clause
+        Makes code for a predicate. Tries all the clauses, and backtracks if necessary
+        """
+        pass
+
+    def code(self) -> CompilationResult:
+        """
+        Makes code for the whole program
         """
         pass
 
