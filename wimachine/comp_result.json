@@ -1,0 +1,336 @@
+{
+    "description": "Program",
+    "description_node": "app(X, Y, Z) :- X = [], Y = Z\napp(X, Y, Z) :- X = [H|X'], Z = [H|Z'], app(X', Y, Z')\n  ? app(X, Y, [a|[b|[d|[e|[f|[]]]]]])",
+    "code": [
+        "INIT A",
+        "PUSHENV 2",
+        {
+            "description": "Literal app(X, Y, [a|[b|[d|[e|[f|[]]]]]])",
+            "description_node": "app(X, Y, [a|[b|[d|[e|[f|[]]]]]])",
+            "code": [
+                "MARK B",
+                {
+                    "description": "Variable X",
+                    "description_node": "X",
+                    "code": [
+                        "PUTVAR 1"
+                    ]
+                },
+                {
+                    "description": "Variable Y",
+                    "description_node": "Y",
+                    "code": [
+                        "PUTVAR 2"
+                    ]
+                },
+                {
+                    "description": "Constructor CONS(a, [b|[d|[e|[f|[]]]]])",
+                    "description_node": "[a|[b|[d|[e|[f|[]]]]]]",
+                    "code": [
+                        {
+                            "description": "Atom a",
+                            "description_node": "a",
+                            "code": [
+                                "PUTATOM a"
+                            ]
+                        },
+                        {
+                            "description": "Constructor CONS(b, [d|[e|[f|[]]]])",
+                            "description_node": "[b|[d|[e|[f|[]]]]]",
+                            "code": [
+                                {
+                                    "description": "Atom b",
+                                    "description_node": "b",
+                                    "code": [
+                                        "PUTATOM b"
+                                    ]
+                                },
+                                {
+                                    "description": "Constructor CONS(d, [e|[f|[]]])",
+                                    "description_node": "[d|[e|[f|[]]]]",
+                                    "code": [
+                                        {
+                                            "description": "Atom d",
+                                            "description_node": "d",
+                                            "code": [
+                                                "PUTATOM d"
+                                            ]
+                                        },
+                                        {
+                                            "description": "Constructor CONS(e, [f|[]])",
+                                            "description_node": "[e|[f|[]]]",
+                                            "code": [
+                                                {
+                                                    "description": "Atom e",
+                                                    "description_node": "e",
+                                                    "code": [
+                                                        "PUTATOM e"
+                                                    ]
+                                                },
+                                                {
+                                                    "description": "Constructor CONS(f, [])",
+                                                    "description_node": "[f|[]]",
+                                                    "code": [
+                                                        {
+                                                            "description": "Atom f",
+                                                            "description_node": "f",
+                                                            "code": [
+                                                                "PUTATOM f"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "description": "Constructor NIL()",
+                                                            "description_node": "[]",
+                                                            "code": [
+                                                                "PUTSTRUCT NIL/0"
+                                                            ]
+                                                        },
+                                                        "PUTSTRUCT CONS/2"
+                                                    ]
+                                                },
+                                                "PUTSTRUCT CONS/2"
+                                            ]
+                                        },
+                                        "PUTSTRUCT CONS/2"
+                                    ]
+                                },
+                                "PUTSTRUCT CONS/2"
+                            ]
+                        },
+                        "PUTSTRUCT CONS/2"
+                    ]
+                },
+                "CALL app/3",
+                "JUMP_TARGET B"
+            ]
+        },
+        "HALT 2",
+        "JUMP_TARGET A",
+        "NO",
+        {
+            "description": "Predicate app/3",
+            "description_node": "app(X, Y, Z) :- X = [], Y = Z\napp(X, Y, Z) :- X = [H|X'], Z = [H|Z'], app(X', Y, Z')",
+            "code": [
+                "JUMP_TARGET app/3",
+                "SETBTP",
+                "TRY C",
+                "DELBTP",
+                "JUMP D",
+                "JUMP_TARGET C",
+                {
+                    "description": "Clause",
+                    "description_node": "app(X, Y, Z) :- X = [], Y = Z",
+                    "code": [
+                        "PUSHENV 3",
+                        {
+                            "description": "Unification",
+                            "description_node": "X = []",
+                            "code": [
+                                "PUTREF 1",
+                                {
+                                    "description": "CodeU Constructor NIL()",
+                                    "description_node": "[]",
+                                    "code": [
+                                        "USTRUCT NIL/0 E",
+                                        "UP F",
+                                        "JUMP_TARGET E",
+                                        {
+                                            "description": "Check ivars",
+                                            "description_node": null,
+                                            "code": []
+                                        },
+                                        {
+                                            "description": "Constructor NIL()",
+                                            "description_node": "[]",
+                                            "code": [
+                                                "PUTSTRUCT NIL/0"
+                                            ]
+                                        },
+                                        "BIND",
+                                        "JUMP_TARGET F"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "description": "Unification",
+                            "description_node": "Y = Z",
+                            "code": [
+                                "PUTREF 2",
+                                {
+                                    "description": "CodeU InitializedVariable Z",
+                                    "description_node": "Z",
+                                    "code": [
+                                        "UREF 3"
+                                    ]
+                                }
+                            ]
+                        },
+                        "POPENV"
+                    ]
+                },
+                "JUMP_TARGET D",
+                {
+                    "description": "Clause",
+                    "description_node": "app(X, Y, Z) :- X = [H|X'], Z = [H|Z'], app(X', Y, Z')",
+                    "code": [
+                        "PUSHENV 6",
+                        {
+                            "description": "Unification",
+                            "description_node": "X = [H|X']",
+                            "code": [
+                                "PUTREF 1",
+                                {
+                                    "description": "CodeU Constructor CONS(H, X')",
+                                    "description_node": "[H|X']",
+                                    "code": [
+                                        "USTRUCT CONS/2 G",
+                                        "SON 1",
+                                        {
+                                            "description": "CodeU Variable H",
+                                            "description_node": "H",
+                                            "code": [
+                                                "UVAR 4"
+                                            ]
+                                        },
+                                        "SON 2",
+                                        {
+                                            "description": "CodeU Variable X'",
+                                            "description_node": "X'",
+                                            "code": [
+                                                "UVAR 5"
+                                            ]
+                                        },
+                                        "UP H",
+                                        "JUMP_TARGET G",
+                                        {
+                                            "description": "Check ivars",
+                                            "description_node": null,
+                                            "code": []
+                                        },
+                                        {
+                                            "description": "Constructor CONS(H, X')",
+                                            "description_node": "[H|X']",
+                                            "code": [
+                                                {
+                                                    "description": "Variable H",
+                                                    "description_node": "H",
+                                                    "code": [
+                                                        "PUTVAR 4"
+                                                    ]
+                                                },
+                                                {
+                                                    "description": "Variable X'",
+                                                    "description_node": "X'",
+                                                    "code": [
+                                                        "PUTVAR 5"
+                                                    ]
+                                                },
+                                                "PUTSTRUCT CONS/2"
+                                            ]
+                                        },
+                                        "BIND",
+                                        "JUMP_TARGET H"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "description": "Unification",
+                            "description_node": "Z = [H|Z']",
+                            "code": [
+                                "PUTREF 3",
+                                {
+                                    "description": "CodeU Constructor CONS(H, Z')",
+                                    "description_node": "[H|Z']",
+                                    "code": [
+                                        "USTRUCT CONS/2 I",
+                                        "SON 1",
+                                        {
+                                            "description": "CodeU InitializedVariable H",
+                                            "description_node": "H",
+                                            "code": [
+                                                "UREF 4"
+                                            ]
+                                        },
+                                        "SON 2",
+                                        {
+                                            "description": "CodeU Variable Z'",
+                                            "description_node": "Z'",
+                                            "code": [
+                                                "UVAR 6"
+                                            ]
+                                        },
+                                        "UP J",
+                                        "JUMP_TARGET I",
+                                        {
+                                            "description": "Check ivars",
+                                            "description_node": null,
+                                            "code": [
+                                                "CHECK 4"
+                                            ]
+                                        },
+                                        {
+                                            "description": "Constructor CONS(H, Z')",
+                                            "description_node": "[H|Z']",
+                                            "code": [
+                                                {
+                                                    "description": "InitializedVariable H",
+                                                    "description_node": "H",
+                                                    "code": [
+                                                        "PUTREF 4"
+                                                    ]
+                                                },
+                                                {
+                                                    "description": "Variable Z'",
+                                                    "description_node": "Z'",
+                                                    "code": [
+                                                        "PUTVAR 6"
+                                                    ]
+                                                },
+                                                "PUTSTRUCT CONS/2"
+                                            ]
+                                        },
+                                        "BIND",
+                                        "JUMP_TARGET J"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "description": "Literal app(X', Y, Z')",
+                            "description_node": "app(X', Y, Z')",
+                            "code": [
+                                "MARK K",
+                                {
+                                    "description": "InitializedVariable X'",
+                                    "description_node": "X'",
+                                    "code": [
+                                        "PUTREF 5"
+                                    ]
+                                },
+                                {
+                                    "description": "InitializedVariable Y",
+                                    "description_node": "Y",
+                                    "code": [
+                                        "PUTREF 2"
+                                    ]
+                                },
+                                {
+                                    "description": "InitializedVariable Z'",
+                                    "description_node": "Z'",
+                                    "code": [
+                                        "PUTREF 6"
+                                    ]
+                                },
+                                "CALL app/3",
+                                "JUMP_TARGET K"
+                            ]
+                        },
+                        "POPENV"
+                    ]
+                }
+            ]
+        }
+    ]
+}

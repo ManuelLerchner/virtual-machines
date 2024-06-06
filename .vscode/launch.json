@@ -17,6 +17,13 @@
             "request": "launch",
             "program": "${workspaceFolder}/maurermachine/main.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "WiMachine",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/wimachine/main.py",
+            "console": "integratedTerminal"
         }
     ]
 }
