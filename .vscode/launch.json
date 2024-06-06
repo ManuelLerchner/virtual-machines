@@ -9,21 +9,24 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/cmachine/main.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/cmachine"
         },
         {
             "name": "MaurerMachine",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/maurermachine/main.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/maurermachine"
         },
         {
             "name": "WiMachine",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/wimachine/main.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/wimachine"
         }
     ]
 }

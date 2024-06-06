@@ -1,0 +1,530 @@
+{
+    "description": "Code for program",
+    "description_node": "int out;\n\nint fib (int n;)\n  if ((n <= 1)):\n    return n\n  else:\n    return (fib((n - 1)) + fib((n - 2)))\n\nint fac (int x;)\n  if ((x <= 0)):\n    return 1\n  else:\n    return (x * fac((x - 1)))\n\nint main ()\n  out = fib(4)\n  print(out);\n  out = (out + fac(2))\n  print(out);\n  return out",
+    "code": [
+        "ENTER 5",
+        "ALLOC 2",
+        "mark",
+        "LOADC main",
+        "call",
+        "SLIDE 1",
+        "halt",
+        "JUMP_TARGET fib",
+        {
+            "description": "Code for function definition",
+            "description_node": "int fib (int n;)\n  if ((n <= 1)):\n    return n\n  else:\n    return (fib((n - 1)) + fib((n - 2)))",
+            "code": [
+                "JUMP_TARGET a",
+                "ENTER 500",
+                {
+                    "description": "Code for if else",
+                    "description_node": "if ((n <= 1)):\n  return n\nelse:\n  return (fib((n - 1)) + fib((n - 2)))",
+                    "code": [
+                        {
+                            "description": "CodeR for I.LEQ",
+                            "description_node": "(n <= 1)",
+                            "code": [
+                                {
+                                    "description": "CodeR for n",
+                                    "description_node": "n",
+                                    "code": [
+                                        {
+                                            "description": "CodeL for n",
+                                            "description_node": "n",
+                                            "code": [
+                                                "LOADRC -3"
+                                            ]
+                                        },
+                                        "load"
+                                    ]
+                                },
+                                {
+                                    "description": "CodeR for 1",
+                                    "description_node": "1",
+                                    "code": [
+                                        "LOADC 1"
+                                    ]
+                                },
+                                "<="
+                            ]
+                        },
+                        "JUMPZ b",
+                        {
+                            "description": "Code for return",
+                            "description_node": "return n",
+                            "code": [
+                                {
+                                    "description": "CodeR for n",
+                                    "description_node": "n",
+                                    "code": [
+                                        {
+                                            "description": "CodeL for n",
+                                            "description_node": "n",
+                                            "code": [
+                                                "LOADRC -3"
+                                            ]
+                                        },
+                                        "load"
+                                    ]
+                                },
+                                "LOADRC -3",
+                                "store",
+                                "return"
+                            ]
+                        },
+                        "JUMP c",
+                        "JUMP_TARGET b",
+                        {
+                            "description": "Code for return",
+                            "description_node": "return (fib((n - 1)) + fib((n - 2)))",
+                            "code": [
+                                {
+                                    "description": "CodeR for I.ADD",
+                                    "description_node": "(fib((n - 1)) + fib((n - 2)))",
+                                    "code": [
+                                        {
+                                            "description": "CodeR for function call",
+                                            "description_node": "fib((n - 1))",
+                                            "code": [
+                                                {
+                                                    "description": "CodeR for I.SUB",
+                                                    "description_node": "(n - 1)",
+                                                    "code": [
+                                                        {
+                                                            "description": "CodeR for n",
+                                                            "description_node": "n",
+                                                            "code": [
+                                                                {
+                                                                    "description": "CodeL for n",
+                                                                    "description_node": "n",
+                                                                    "code": [
+                                                                        "LOADRC -3"
+                                                                    ]
+                                                                },
+                                                                "load"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "description": "CodeR for 1",
+                                                            "description_node": "1",
+                                                            "code": [
+                                                                "LOADC 1"
+                                                            ]
+                                                        },
+                                                        "-"
+                                                    ]
+                                                },
+                                                "mark",
+                                                {
+                                                    "description": "CodeR for fib",
+                                                    "description_node": "fib",
+                                                    "code": [
+                                                        "LOADC a"
+                                                    ]
+                                                },
+                                                "call",
+                                                "SLIDE 0"
+                                            ]
+                                        },
+                                        {
+                                            "description": "CodeR for function call",
+                                            "description_node": "fib((n - 2))",
+                                            "code": [
+                                                {
+                                                    "description": "CodeR for I.SUB",
+                                                    "description_node": "(n - 2)",
+                                                    "code": [
+                                                        {
+                                                            "description": "CodeR for n",
+                                                            "description_node": "n",
+                                                            "code": [
+                                                                {
+                                                                    "description": "CodeL for n",
+                                                                    "description_node": "n",
+                                                                    "code": [
+                                                                        "LOADRC -3"
+                                                                    ]
+                                                                },
+                                                                "load"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "description": "CodeR for 2",
+                                                            "description_node": "2",
+                                                            "code": [
+                                                                "LOADC 2"
+                                                            ]
+                                                        },
+                                                        "-"
+                                                    ]
+                                                },
+                                                "mark",
+                                                {
+                                                    "description": "CodeR for fib",
+                                                    "description_node": "fib",
+                                                    "code": [
+                                                        "LOADC a"
+                                                    ]
+                                                },
+                                                "call",
+                                                "SLIDE 0"
+                                            ]
+                                        },
+                                        "+"
+                                    ]
+                                },
+                                "LOADRC -3",
+                                "store",
+                                "return"
+                            ]
+                        },
+                        "JUMP_TARGET c"
+                    ]
+                },
+                "return"
+            ]
+        },
+        "JUMP_TARGET fac",
+        {
+            "description": "Code for function definition",
+            "description_node": "int fac (int x;)\n  if ((x <= 0)):\n    return 1\n  else:\n    return (x * fac((x - 1)))",
+            "code": [
+                "JUMP_TARGET d",
+                "ENTER 500",
+                {
+                    "description": "Code for if else",
+                    "description_node": "if ((x <= 0)):\n  return 1\nelse:\n  return (x * fac((x - 1)))",
+                    "code": [
+                        {
+                            "description": "CodeR for I.LEQ",
+                            "description_node": "(x <= 0)",
+                            "code": [
+                                {
+                                    "description": "CodeR for x",
+                                    "description_node": "x",
+                                    "code": [
+                                        {
+                                            "description": "CodeL for x",
+                                            "description_node": "x",
+                                            "code": [
+                                                "LOADRC -3"
+                                            ]
+                                        },
+                                        "load"
+                                    ]
+                                },
+                                {
+                                    "description": "CodeR for 0",
+                                    "description_node": "0",
+                                    "code": [
+                                        "LOADC 0"
+                                    ]
+                                },
+                                "<="
+                            ]
+                        },
+                        "JUMPZ e",
+                        {
+                            "description": "Code for return",
+                            "description_node": "return 1",
+                            "code": [
+                                {
+                                    "description": "CodeR for 1",
+                                    "description_node": "1",
+                                    "code": [
+                                        "LOADC 1"
+                                    ]
+                                },
+                                "LOADRC -3",
+                                "store",
+                                "return"
+                            ]
+                        },
+                        "JUMP f",
+                        "JUMP_TARGET e",
+                        {
+                            "description": "Code for return",
+                            "description_node": "return (x * fac((x - 1)))",
+                            "code": [
+                                {
+                                    "description": "CodeR for I.MUL",
+                                    "description_node": "(x * fac((x - 1)))",
+                                    "code": [
+                                        {
+                                            "description": "CodeR for x",
+                                            "description_node": "x",
+                                            "code": [
+                                                {
+                                                    "description": "CodeL for x",
+                                                    "description_node": "x",
+                                                    "code": [
+                                                        "LOADRC -3"
+                                                    ]
+                                                },
+                                                "load"
+                                            ]
+                                        },
+                                        {
+                                            "description": "CodeR for function call",
+                                            "description_node": "fac((x - 1))",
+                                            "code": [
+                                                {
+                                                    "description": "CodeR for I.SUB",
+                                                    "description_node": "(x - 1)",
+                                                    "code": [
+                                                        {
+                                                            "description": "CodeR for x",
+                                                            "description_node": "x",
+                                                            "code": [
+                                                                {
+                                                                    "description": "CodeL for x",
+                                                                    "description_node": "x",
+                                                                    "code": [
+                                                                        "LOADRC -3"
+                                                                    ]
+                                                                },
+                                                                "load"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "description": "CodeR for 1",
+                                                            "description_node": "1",
+                                                            "code": [
+                                                                "LOADC 1"
+                                                            ]
+                                                        },
+                                                        "-"
+                                                    ]
+                                                },
+                                                "mark",
+                                                {
+                                                    "description": "CodeR for fac",
+                                                    "description_node": "fac",
+                                                    "code": [
+                                                        "LOADC d"
+                                                    ]
+                                                },
+                                                "call",
+                                                "SLIDE 0"
+                                            ]
+                                        },
+                                        "*"
+                                    ]
+                                },
+                                "LOADRC -3",
+                                "store",
+                                "return"
+                            ]
+                        },
+                        "JUMP_TARGET f"
+                    ]
+                },
+                "return"
+            ]
+        },
+        "JUMP_TARGET main",
+        {
+            "description": "Code for function definition",
+            "description_node": "int main ()\n  out = fib(4)\n  print(out);\n  out = (out + fac(2))\n  print(out);\n  return out",
+            "code": [
+                "JUMP_TARGET g",
+                "ENTER 500",
+                {
+                    "description": "Code for statement sequence",
+                    "description_node": "out = fib(4)\nprint(out);\nout = (out + fac(2))\nprint(out);\nreturn out",
+                    "code": [
+                        {
+                            "description": "Code",
+                            "description_node": "out = fib(4)",
+                            "code": [
+                                {
+                                    "description": "CodeR for assignment",
+                                    "description_node": "out = fib(4)",
+                                    "code": [
+                                        {
+                                            "description": "CodeR for function call",
+                                            "description_node": "fib(4)",
+                                            "code": [
+                                                {
+                                                    "description": "CodeR for 4",
+                                                    "description_node": "4",
+                                                    "code": [
+                                                        "LOADC 4"
+                                                    ]
+                                                },
+                                                "mark",
+                                                {
+                                                    "description": "CodeR for fib",
+                                                    "description_node": "fib",
+                                                    "code": [
+                                                        "LOADC a"
+                                                    ]
+                                                },
+                                                "call",
+                                                "SLIDE 0"
+                                            ]
+                                        },
+                                        {
+                                            "description": "CodeL for out",
+                                            "description_node": "out",
+                                            "code": [
+                                                "LOADC 1"
+                                            ]
+                                        },
+                                        "store"
+                                    ]
+                                },
+                                "pop"
+                            ]
+                        },
+                        {
+                            "description": "Code",
+                            "description_node": "print(out);",
+                            "code": [
+                                {
+                                    "description": "CodeR for print",
+                                    "description_node": "print(out);",
+                                    "code": [
+                                        {
+                                            "description": "CodeR for out",
+                                            "description_node": "out",
+                                            "code": [
+                                                {
+                                                    "description": "CodeL for out",
+                                                    "description_node": "out",
+                                                    "code": [
+                                                        "LOADC 1"
+                                                    ]
+                                                },
+                                                "load"
+                                            ]
+                                        },
+                                        "print"
+                                    ]
+                                },
+                                "pop"
+                            ]
+                        },
+                        {
+                            "description": "Code",
+                            "description_node": "out = (out + fac(2))",
+                            "code": [
+                                {
+                                    "description": "CodeR for assignment",
+                                    "description_node": "out = (out + fac(2))",
+                                    "code": [
+                                        {
+                                            "description": "CodeR for I.ADD",
+                                            "description_node": "(out + fac(2))",
+                                            "code": [
+                                                {
+                                                    "description": "CodeR for out",
+                                                    "description_node": "out",
+                                                    "code": [
+                                                        {
+                                                            "description": "CodeL for out",
+                                                            "description_node": "out",
+                                                            "code": [
+                                                                "LOADC 1"
+                                                            ]
+                                                        },
+                                                        "load"
+                                                    ]
+                                                },
+                                                {
+                                                    "description": "CodeR for function call",
+                                                    "description_node": "fac(2)",
+                                                    "code": [
+                                                        {
+                                                            "description": "CodeR for 2",
+                                                            "description_node": "2",
+                                                            "code": [
+                                                                "LOADC 2"
+                                                            ]
+                                                        },
+                                                        "mark",
+                                                        {
+                                                            "description": "CodeR for fac",
+                                                            "description_node": "fac",
+                                                            "code": [
+                                                                "LOADC d"
+                                                            ]
+                                                        },
+                                                        "call",
+                                                        "SLIDE 0"
+                                                    ]
+                                                },
+                                                "+"
+                                            ]
+                                        },
+                                        {
+                                            "description": "CodeL for out",
+                                            "description_node": "out",
+                                            "code": [
+                                                "LOADC 1"
+                                            ]
+                                        },
+                                        "store"
+                                    ]
+                                },
+                                "pop"
+                            ]
+                        },
+                        {
+                            "description": "Code",
+                            "description_node": "print(out);",
+                            "code": [
+                                {
+                                    "description": "CodeR for print",
+                                    "description_node": "print(out);",
+                                    "code": [
+                                        {
+                                            "description": "CodeR for out",
+                                            "description_node": "out",
+                                            "code": [
+                                                {
+                                                    "description": "CodeL for out",
+                                                    "description_node": "out",
+                                                    "code": [
+                                                        "LOADC 1"
+                                                    ]
+                                                },
+                                                "load"
+                                            ]
+                                        },
+                                        "print"
+                                    ]
+                                },
+                                "pop"
+                            ]
+                        },
+                        {
+                            "description": "Code for return",
+                            "description_node": "return out",
+                            "code": [
+                                {
+                                    "description": "CodeR for out",
+                                    "description_node": "out",
+                                    "code": [
+                                        {
+                                            "description": "CodeL for out",
+                                            "description_node": "out",
+                                            "code": [
+                                                "LOADC 1"
+                                            ]
+                                        },
+                                        "load"
+                                    ]
+                                },
+                                "LOADRC -3",
+                                "store",
+                                "return"
+                            ]
+                        }
+                    ]
+                },
+                "return"
+            ]
+        }
+    ]
+}

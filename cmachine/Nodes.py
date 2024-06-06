@@ -1,7 +1,7 @@
 import random
 import string
 from typing import Any
-from ASTNode import ASTNode
+from ASTNode import ASTNode, makeCompilationResult
 from Instructions import Instructions0Params as I0P
 from enum import Enum
 from Instructions import Instructions1Params as I1P, bcolors
@@ -16,7 +16,8 @@ class Number(ASTNode):
         self.value = value
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [I1P(I1P.I.LOADC, self.value)]
+        code = [I1P(I1P.I.LOADC, self.value)]
+        return makeCompilationResult(code, f"CodeR for {self.value}", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load L-value of a number")
@@ -43,19 +44,24 @@ class Variable(ASTNode):
     def codeR(self, addressSpace: AdressSpace, n):
         # is function
         if "(" in self.type:
-            return [I1P(I1P.I.LOADC, addressSpace[self.name][1])]
+            code = [I1P(I1P.I.LOADC, addressSpace[self.name][1])]
+            return makeCompilationResult(code, f"CodeR for {self.name}", self)
 
         (_, arraySize) = SIZEOF[self.name]
         if arraySize > 1:
-            return self.codeL(addressSpace, n)
+            code = self.codeL(addressSpace, n)
         else:
-            return [*self.codeL(addressSpace, n), I0P(I0P.I.LOAD)]
+            code = [self.codeL(addressSpace, n), I0P(I0P.I.LOAD)]
+
+        return makeCompilationResult(code, f"CodeR for {self.name}", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
         if addressSpace[self.name][0] == 'G':
-            return [I1P(I1P.I.LOADC, addressSpace[self.name][1])]
+            code = [I1P(I1P.I.LOADC, addressSpace[self.name][1])]
         else:
-            return [I1P(I1P.I.LOADRC, addressSpace[self.name][1])]
+            code = [I1P(I1P.I.LOADRC, addressSpace[self.name][1])]
+
+        return makeCompilationResult(code, f"CodeL for {self.name}", self)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -72,7 +78,9 @@ class UnaryOperator(ASTNode):
         self.node = node
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [*self.node.codeR(addressSpace, n), I0P(self.operator)]
+        code = [self.node.codeR(addressSpace, n), I0P(self.operator)]
+
+        makeCompilationResult(code, f"CodeR for {self.operator}", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load L-value of a unary operator")
@@ -93,7 +101,9 @@ class BinaryOperation(ASTNode):
         self.right = right
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [*self.left.codeR(addressSpace, n), *self.right.codeR(addressSpace, n), I0P(self.operator)]
+        code = [self.left.codeR(addressSpace, n),
+                self.right.codeR(addressSpace, n), I0P(self.operator)]
+        return makeCompilationResult(code, f"CodeR for {self.operator}", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load L-value of a binary operator")
@@ -113,7 +123,9 @@ class Assignment(ASTNode):
         self.right = right
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [*self.right.codeR(addressSpace, n), *self.left.codeL(addressSpace, n), I0P(I0P.I.STORE)]
+        code = [self.right.codeR(addressSpace, n),
+                self.left.codeL(addressSpace, n), I0P(I0P.I.STORE)]
+        return makeCompilationResult(code, f"CodeR for assignment", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load L-value of an assignment")
@@ -131,7 +143,8 @@ class Print(ASTNode):
         self.node = node
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [*self.node.codeR(addressSpace, n), I0P(I0P.I.PRINT)]
+        code = [self.node.codeR(addressSpace, n), I0P(I0P.I.PRINT)]
+        return makeCompilationResult(code, f"CodeR for print", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load L-value of a print")
@@ -156,7 +169,7 @@ class Comma(ASTNode):
                 I0P.I.POP)]
         instructions += self.nodes[-1].codeR(addressSpace, n)
 
-        return instructions
+        return makeCompilationResult(instructions, f"CodeR for comma", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load L-value of a comma")
@@ -176,8 +189,8 @@ class StatementSequence(ASTNode):
     def code(self, addressSpace: AdressSpace, n):
         instructions = []
         for node in self.nodes:
-            instructions += node.code(addressSpace, n)
-        return instructions
+            instructions.append(node.code(addressSpace, n))
+        return makeCompilationResult(instructions, f"Code for statement sequence", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load R-value of a statement sequence")
@@ -223,7 +236,9 @@ class If(ASTNode):
 
     def code(self, addressSpace: AdressSpace, n):
         A = label_generator()
-        return [*self.condition.codeR(addressSpace, n), I1P(I1P.I.JUMPZ, A), *self.then.code(addressSpace, n), I1P(I1P.I.JUMP_TARGET, A)]
+        code = [self.condition.codeR(addressSpace, n), I1P(
+            I1P.I.JUMPZ, A), self.then.code(addressSpace, n), I1P(I1P.I.JUMP_TARGET, A)]
+        return makeCompilationResult(code, f"Code for if", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load R-value of an if statement")
@@ -248,7 +263,9 @@ class IfElse(ASTNode):
     def code(self, addressSpace: AdressSpace, n):
         A = label_generator()
         B = label_generator()
-        return [*self.condition.codeR(addressSpace, n), I1P(I1P.I.JUMPZ, A), *self.then.code(addressSpace, n), I1P(I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A), *self.else_.code(addressSpace, n), I1P(I1P.I.JUMP_TARGET, B)]
+        code = [self.condition.codeR(addressSpace, n), I1P(I1P.I.JUMPZ, A), self.then.code(addressSpace, n), I1P(
+            I1P.I.JUMP, B), I1P(I1P.I.JUMP_TARGET, A), self.else_.code(addressSpace, n), I1P(I1P.I.JUMP_TARGET, B)]
+        return makeCompilationResult(code, f"Code for if else", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load R-value of an if statement")
@@ -272,7 +289,9 @@ class While(ASTNode):
     def code(self, addressSpace: AdressSpace, n):
         A = label_generator()
         B = label_generator()
-        return [I1P(I1P.I.JUMP_TARGET, A), *self.condition.codeR(addressSpace, n), I1P(I1P.I.JUMPZ, B), *self.body.code(addressSpace, n), I1P(I1P.I.JUMP, A), I1P(I1P.I.JUMP_TARGET, B)]
+        code = [I1P(I1P.I.JUMP_TARGET, A), self.condition.codeR(addressSpace, n), I1P(I1P.I.JUMPZ, B),
+                self.body.code(addressSpace, n), I1P(I1P.I.JUMP, A), I1P(I1P.I.JUMP_TARGET, B)]
+        return makeCompilationResult(code, f"Code for while", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load R-value of a while statement")
@@ -299,7 +318,10 @@ class For(ASTNode):
         A = label_generator()
         B = label_generator()
 
-        return [*self.initialization.codeR(addressSpace, n), I0P(I0P.I.POP), I1P(I1P.I.JUMP_TARGET, A), *self.condition.codeR(addressSpace, n), I1P(I1P.I.JUMPZ, B), *self.body.code(addressSpace, n), *self.increment.codeR(addressSpace, n), I0P(I0P.I.POP), I1P(I1P.I.JUMP, A), I1P(I1P.I.JUMP_TARGET, B)]
+        code = [self.initialization.codeR(addressSpace, n), I0P(I0P.I.POP), I1P(I1P.I.JUMP_TARGET, A), self.condition.codeR(addressSpace, n), I1P(
+            I1P.I.JUMPZ, B), self.body.code(addressSpace, n), self.increment.codeR(addressSpace, n), I0P(I0P.I.POP), I1P(I1P.I.JUMP, A), I1P(I1P.I.JUMP_TARGET, B)]
+
+        return makeCompilationResult(code, f"Code for for", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load R-value of a for statement")
@@ -329,10 +351,12 @@ class DeclareVariable(ASTNode):
         newAdressSpace[self.name] = ('L', n)
         SIZEOF[self.type] = (self.typeSize, 1)
         SIZEOF[self.name] = (self.typeSize, self.arraySize)
-        return [I1P(I1P.I.ALLOC, totalSize), *self.ss.code(newAdressSpace, n + totalSize)]
+        code = [I1P(I1P.I.ALLOC, totalSize),
+                self.ss.code(newAdressSpace, n + totalSize)]
+        return makeCompilationResult(code, f"Code for declaration", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [*self.codeL(addressSpace, n), I0P(I0P.I.LOAD)]
+        return [self.codeL(addressSpace, n), I0P(I0P.I.LOAD)]
 
     def codeL(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load L-value of a declaration")
@@ -368,7 +392,9 @@ class DeclareStruct(ASTNode):
         STRUCT_ADRESS_SPACES[self.type] = structAdressSpace
         SIZEOF[self.type] = (currentOffset, 1)
         newAdressSpace[self.name] = ('L', n)
-        return [I1P(I1P.I.ALLOC, currentOffset), *self.ss.code(newAdressSpace, n + currentOffset)]
+        code = [I1P(I1P.I.ALLOC, currentOffset),
+                self.ss.code(newAdressSpace, n + currentOffset)]
+        return makeCompilationResult(code, f"Code for struct declaration", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load R-value of a struct")
@@ -395,10 +421,13 @@ class ArrayAccess(ASTNode):
 
     def codeL(self, addressSpace: AdressSpace, n):
         typeSize = SIZEOF[self.e1.getType()][0]
-        return [*self.e1.codeR(addressSpace, n), *self.e2.codeR(addressSpace, n), I1P(I1P.I.LOADC, typeSize), I0P(I0P.I.MUL), I0P(I0P.I.ADD)]
+        code = [self.e1.codeR(addressSpace, n), self.e2.codeR(addressSpace, n),
+                I1P(I1P.I.LOADC, typeSize), I0P(I0P.I.MUL), I0P(I0P.I.ADD)]
+        return makeCompilationResult(code, f"CodeL for array access", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [*self.codeL(addressSpace, n), I0P(I0P.I.LOAD)]
+        code = [self.codeL(addressSpace, n), I0P(I0P.I.LOAD)]
+        return makeCompilationResult(code, f"CodeR for array access", self)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -416,10 +445,13 @@ class StructAccess(ASTNode):
     def codeL(self, addressSpace: AdressSpace, n):
         structAdressSpace = STRUCT_ADRESS_SPACES.get(self.struct_name.name)
         offset = structAdressSpace[self.member_name][1]
-        return [*self.struct_name.codeL(addressSpace, n), I1P(I1P.I.LOADC, offset), I0P(I0P.I.ADD)]
+        code = [self.struct_name.codeL(addressSpace, n),
+                I1P(I1P.I.LOADC, offset), I0P(I0P.I.ADD)]
+        return makeCompilationResult(code, f"CodeL for struct access", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [*self.codeL(addressSpace, n), I0P(I0P.I.LOAD)]
+        code = [self.codeL(addressSpace, n), I0P(I0P.I.LOAD)]
+        return makeCompilationResult(code, f"CodeR for struct access", self)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -434,7 +466,7 @@ class Malloc(ASTNode):
         self.size = size
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [*self.size.codeR(addressSpace, n), I0P(I0P.I.NEW)]
+        return [self.size.codeR(addressSpace, n), I0P(I0P.I.NEW)]
 
     def codeL(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load L-value of a malloc")
@@ -452,10 +484,12 @@ class Dereference(ASTNode):
         self.a = a
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [*self.a.codeR(addressSpace, n), I0P(I0P.I.LOAD)]
+        code = [self.a.codeR(addressSpace, n), I0P(I0P.I.LOAD)]
+        return makeCompilationResult(code, f"CodeR for dereference", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
-        return [*self.a.codeR(addressSpace, n)]
+        code = [self.a.codeR(addressSpace, n)]
+        return makeCompilationResult(code, f"CodeL for dereference", self)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -470,7 +504,8 @@ class AddressOf(ASTNode):
         self.a = a
 
     def codeR(self, addressSpace: AdressSpace, n):
-        return [*self.a.codeL(addressSpace, n)]
+        code = [self.a.codeL(addressSpace, n)]
+        return makeCompilationResult(code, f"CodeR for address of", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load L-value of an address of")
@@ -491,12 +526,15 @@ class Arrow(ASTNode):
     def codeR(self, addressSpace: AdressSpace, n):
         (_, arraySize) = SIZEOF[self.member_name]
         if arraySize > 1:
-            return self.codeL(addressSpace, n)
+            code = self.codeL(addressSpace, n)
         else:
-            return [*self.codeL(addressSpace, n), I0P(I0P.I.LOAD)]
+            code = [self.codeL(addressSpace, n), I0P(I0P.I.LOAD)]
+        return makeCompilationResult(code, f"CodeR for arrow", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
-        return [*self.a.codeR(addressSpace, n), I1P(I1P.I.LOADC, STRUCT_ADRESS_SPACES[self.a.type.replace("*", "")][self.member_name][1]), I0P(I0P.I.ADD)]
+        code = [self.a.codeR(addressSpace, n), I1P(I1P.I.LOADC,
+                                                   STRUCT_ADRESS_SPACES[self.a.type.replace("*", "")][self.member_name][1]), I0P(I0P.I.ADD)]
+        return makeCompilationResult(code, f"CodeL for arrow", self)
 
     def pretty_print(self, indent):
         space = "  " * indent
@@ -524,7 +562,9 @@ class FunctionDefinition(ASTNode):
             SIZEOF[arg.type] = (SIZEOF[arg.getType()][0], 1)
             SIZEOF[arg.name] = (SIZEOF[arg.getType()][0], 1)
         SIZEOF[self.name] = (1, 1)
-        return [I1P(I1P.I.JUMP_TARGET, _f), I1P(I1P.I.ENTER, 500), *self.body.code(newAdressSpace, 1), I0P(I0P.I.RETURN)]
+        code = [I1P(I1P.I.JUMP_TARGET, _f), I1P(I1P.I.ENTER, 500),
+                self.body.code(newAdressSpace, 1), I0P(I0P.I.RETURN)]
+        return makeCompilationResult(code, f"Code for function definition", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load R-value of a function definition")
@@ -534,7 +574,9 @@ class FunctionDefinition(ASTNode):
 
     def pretty_print(self, indent):
         space = "  " * indent
-        return f"{space}{bcolors.OKMAGENTA+self.type+bcolors.ENDC} {bcolors.OKRED+self.name+bcolors.ENDC}({', '.join([str(arg).replace("\n","") for arg in self.args])}){NEWLINE}{self.body.pretty_print(indent+1)}"
+        # return f"{space}{bcolors.OKMAGENTA+self.type+bcolors.ENDC} {bcolors.OKRED+self.name+bcolors.ENDC} ({', '.join([str(arg).replace("\n","") for arg in self.args])}){NEWLINE}{self.body.pretty_print(indent+1)}"
+
+        return f"{space}{bcolors.OKMAGENTA+self.type+bcolors.ENDC} {bcolors.OKRED+self.name+bcolors.ENDC} ({', '.join([str(arg).replace(NEWLINE, '') for arg in self.args])}){NEWLINE}{self.body.pretty_print(indent+1)}"
 
     def getType(self):
         return self.type
@@ -549,11 +591,12 @@ class FunctionCall(ASTNode):
         instructions = []
         parameter_size = 0
         for arg in reversed(self.args):
-            instructions += arg.codeR(addressSpace, n)
+            instructions.append(arg.codeR(addressSpace, n))
             parameter_size += SIZEOF[arg.getType()][0]
-        instructions += [I0P(I0P.I.MARK), *self.function.codeR(addressSpace, n),
+        instructions += [I0P(I0P.I.MARK), self.function.codeR(addressSpace, n),
                          I0P(I0P.I.CALL), I1P(I1P.I.SLIDE, parameter_size-1)]
-        return instructions
+        code = instructions
+        return makeCompilationResult(code, f"CodeR for function call", self)
 
     def codeL(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load L-value of a function call")
@@ -571,7 +614,9 @@ class Return(ASTNode):
         self.value = value
 
     def code(self, addressSpace: AdressSpace, n):
-        return [*self.value.codeR(addressSpace, n), I1P(I1P.I.LOADRC, -3), I0P(I0P.I.STORE), I0P(I0P.I.RETURN)]
+        code = [self.value.codeR(addressSpace, n), I1P(I1P.I.LOADRC, -3),
+                I0P(I0P.I.STORE), I0P(I0P.I.RETURN)]
+        return makeCompilationResult(code, f"Code for return", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load R-value of a return")
@@ -609,13 +654,13 @@ class Program(ASTNode):
             newAdressSpace[function.name] = (
                 'G', function.name)
             functionCode += [I1P(I1P.I.JUMP_TARGET, function.name),
-                             *function.code(newAdressSpace, n)]
+                             function.code(newAdressSpace, n)]
 
         instructions = [I1P(I1P.I.ENTER, size_of_globals+4), I1P(I1P.I.ALLOC, size_of_globals+1), I0P(I0P.I.MARK),
                         I1P(I1P.I.LOADC, "main"), I0P(I0P.I.CALL), I1P(I1P.I.SLIDE, size_of_globals), I0P(I0P.I.HALT)]
         instructions += functionCode
 
-        return instructions
+        return makeCompilationResult(instructions, f"Code for program", self)
 
     def codeR(self, addressSpace: AdressSpace, n):
         raise Exception("Cannot load R-value of a return")

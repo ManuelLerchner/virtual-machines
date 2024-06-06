@@ -1,5 +1,5 @@
-from Nodes import *
-from Instructions import Instructions0Params as I0P, Instructions1Params as I1P
+from Nodes import * 
+from Instructions import Instructions0Params as I0P, Instructions1Params as I1P 
 from Interpreter import Interpreter
 
 
@@ -64,7 +64,14 @@ if __name__ == '__main__':
 
     print(expr, "\n")
 
-    code = expr.code(variable_adress, 0)
+    comp_result = expr.code(variable_adress, 0)
+
+    comp_result_json = comp_result.to_json()
+
+    with open("comp_result.json", "w") as f:
+        f.write(comp_result_json)
+
+    code = comp_result.to_code()
 
     print(f"Code: [{len(code)} instructions]\n{code}\n")
 
@@ -72,6 +79,6 @@ if __name__ == '__main__':
 
     print("Running...\n")
 
-    s.run(debug=True)
+    s.run(debug=False)
 
     print("Exit code: ", s.stack.stack[0], "\n")
