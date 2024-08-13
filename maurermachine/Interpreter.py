@@ -246,26 +246,15 @@ class Interpreter:
             IR.interpret(self)
 
             if debug:
-                # sleep(0.001)
                 real_ir_length = len(uncolor(str(IR)))
-                registers = f"IR: {str(IR)+' ' * (18 - real_ir_length)} PC: {self.PC: > 5}, SP: {self.stack.SP: > 5}, FP: {self.FP: > 5}, GP: {self.GP: > 5}"
-                if pretty:
-                    clear = '\33[2K'
-                    print(f"\r{clear}", end="")
-                    print(registers)
-                    print(f"\r{clear}", end="")
-                    print(f"\tStack:\t{self.stack}")
-                    print(f"\r{clear}", end="")
-                    print(f"\tHeap:\t{self.heap}", end="\r")
-                    print("\033[2A", end="")
 
-                else:
-                    # sleep(1)
-
-                    print(registers)
-                    print(f"Stack:\t{self.stack}")
-                    print(f"Heap:\t{self.heap}")
-                    print()
+                registers = f"PC: {self.PC: > 5}, SP: {self.stack.SP: > 5}, FP: {self.FP: > 5}, GP: {self.GP: > 5}"
+                print(f"Stack:\t{self.stack}")
+                print(f"Heap:\t{self.heap}")
+                print(
+                    f"Instruction: {str(IR)+' ' * (18 - real_ir_length)} {bcolors.OKBLUE +str(IR.description()) + bcolors.ENDC}")
+                print(registers)
+                print()
 
             if step % 10 == 0:
                 # self.heap.collect_garbage(self.stack)

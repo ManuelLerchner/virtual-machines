@@ -223,6 +223,24 @@ class Unification(ASTNode):
         return f"{self.left.pretty_print(indent)} = {self.right.pretty_print(indent)}"
 
 
+class Cut(ASTNode):
+    def __init__(self):
+        pass
+
+    def codeG(self, addressSpace: dict[str, int]) -> CompilationResult:
+        return makeCompilationResult([I0P(I0P.I.PRUNE),  I1P(I1P.I.PUSHENV, 2),
+                                      ], f"Cut", self)
+
+    def ivars(self) -> set[str]:
+        return set()
+
+    def locals(self) -> set[str]:
+        return set()
+
+    def pretty_print(self, indent: int) -> str:
+        return f"{bcolors.OKCYAN}!{bcolors.ENDC}"
+
+
 class Clause(ASTNode):
     def __init__(self, head:  Literal, goals: List[ASTNode]):
         self.head = head

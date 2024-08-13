@@ -1,6 +1,6 @@
 {
     "description": "Code for program",
-    "description_node": "int out;\n\nint fib (int n;)\n  if ((n <= 1)):\n    return n\n  else:\n    return (fib((n - 1)) + fib((n - 2)))\n\nint fac (int x;)\n  if ((x <= 0)):\n    return 1\n  else:\n    return (x * fac((x - 1)))\n\nint main ()\n  out = fib(4)\n  print(out);\n  out = (out + fac(2))\n  print(out);\n  return out",
+    "description_node": "int out;\n\nint fib (int n;)\n  if ((n <= 1)):\n    return n\n  else:\n    return (fib((n - 1)) + fib((n - 2)))\n\nint fac (int x;)\n  if ((x <= 0)):\n    return 1\n  else:\n    return (x * fac((x - 1)))\n\nint main ()\n  out = fib(2)\n  print(out);\n  out = (out + fac(2))\n  print(out);\n  return out",
     "code": [
         "ENTER 5",
         "ALLOC 2",
@@ -325,31 +325,31 @@
         "JUMP_TARGET main",
         {
             "description": "Code for function definition",
-            "description_node": "int main ()\n  out = fib(4)\n  print(out);\n  out = (out + fac(2))\n  print(out);\n  return out",
+            "description_node": "int main ()\n  out = fib(2)\n  print(out);\n  out = (out + fac(2))\n  print(out);\n  return out",
             "code": [
                 "JUMP_TARGET g",
                 "ENTER 500",
                 {
                     "description": "Code for statement sequence",
-                    "description_node": "out = fib(4)\nprint(out);\nout = (out + fac(2))\nprint(out);\nreturn out",
+                    "description_node": "out = fib(2)\nprint(out);\nout = (out + fac(2))\nprint(out);\nreturn out",
                     "code": [
                         {
                             "description": "Code",
-                            "description_node": "out = fib(4)",
+                            "description_node": "out = fib(2)",
                             "code": [
                                 {
                                     "description": "CodeR for assignment",
-                                    "description_node": "out = fib(4)",
+                                    "description_node": "out = fib(2)",
                                     "code": [
                                         {
                                             "description": "CodeR for function call",
-                                            "description_node": "fib(4)",
+                                            "description_node": "fib(2)",
                                             "code": [
                                                 {
-                                                    "description": "CodeR for 4",
-                                                    "description_node": "4",
+                                                    "description": "CodeR for 2",
+                                                    "description_node": "2",
                                                     "code": [
-                                                        "LOADC 4"
+                                                        "LOADC 2"
                                                     ]
                                                 },
                                                 "mark",

@@ -15,7 +15,7 @@ from time import sleep
 
 class Stack:
     def __init__(self):
-        self.stack: dict[int, int] = defaultdict(lambda: "_")
+        self.stack: dict[int, int] = defaultdict(lambda: "")
         self.SP: int = -1
 
     def __getitem__(self, key: int) -> int:
@@ -189,7 +189,8 @@ class Interpreter:
             if debug:
                 # sleep(0.001)
                 real_ir_length = len(uncolor(str(IR)))
-                registers = f"IR: {str(IR)+' ' * (18 - real_ir_length)} PC: {self.PC: > 5}, SP: {self.stack.SP: > 5}, FP: {self.FP: > 5}, BP: {self.BP: > 5}"
+                registers = f"PC: {self.PC: > 5}, SP: {self.stack.SP: > 5}, FP: {self.FP: > 5}, BP: {self.BP: > 5}" + \
+                    f" HP: {self.heap.HP: > 5}, Trail: {self.trail.SP: > 5}"
                 if pretty:
                     clear = '\33[2K'
                     print(f"\r{clear}", end="")
@@ -205,6 +206,9 @@ class Interpreter:
 
                     print(f"Stack:\t{self.stack}")
                     print(f"Heap:\t{self.heap}")
+                    print(f"Trail:\t{self.trail}")
+                    print(
+                        f"Instruction: {str(IR)+' ' * (18 - real_ir_length)} {bcolors.OKBLUE +str(IR.description()) + bcolors.ENDC}")
                     print(registers)
                     print()
 

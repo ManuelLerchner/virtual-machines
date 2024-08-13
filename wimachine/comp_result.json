@@ -1,142 +1,157 @@
 {
     "description": "Program",
-    "description_node": "person(X) :- X = manuel\nperson(X) :- X = simone\nperson(X) :- X = evi\nperson(X) :- X = elias\nperson(X) :- X = hannes\nperson(X) :- X = irmgard\nperson(X) :- X = elmar\nperson(X) :- X = elisabeth\nperson(X) :- X = oswald\nperson(X) :- X = maria\nperson(X) :- X = peter\nperson(X) :- X = frida\nperson(X) :- X = hansl\n\nis_child(C, P) :- C = manuel, P = irmgard\nis_child(C, P) :- C = manuel, P = elmar\nis_child(C, P) :- C = simone, P = irmgard\nis_child(C, P) :- C = simone, P = elmar\nis_child(C, P) :- C = evi, P = elisabeth\nis_child(C, P) :- C = evi, P = oswald\nis_child(C, P) :- C = elias, P = elisabeth\nis_child(C, P) :- C = elias, P = oswald\nis_child(C, P) :- C = hannes, P = elisabeth\nis_child(C, P) :- C = hannes, P = oswald\nis_child(C, P) :- C = irmgard, P = maria\nis_child(C, P) :- C = irmgard, P = peter\nis_child(C, P) :- C = elmar, P = frida\nis_child(C, P) :- C = elmar, P = hansl\nis_child(C, P) :- C = oswald, P = frida\nis_child(C, P) :- C = oswald, P = hansl\n\nsibling(X, Y) :- is_child(X, P), is_child(Y, P)\n\ngrandson(X, Y) :- is_child(X, P), is_child(P, Y)\n\nancestor(X, Y) :- is_child(Y, X)\nancestor(X, Y) :- is_child(Y, Z), ancestor(X, Z)\n\ndescendant(X, Y) :- ancestor(Y, X)\n\ncousin(X, Y) :- is_child(X, P), is_child(Y, Q), sibling(P, Q)\n\nprobably_married(X, Y) :- is_child(C, X), is_child(C, Y)\n\n  ? probably_married(X, Y)",
+    "description_node": "t(X) :- X = b\n\np() :- q(X), t(X)\n\nq(X) :- s(X)\n\ns(X) :- t(X)\ns(X) :- X = a\n\n  ? p()",
     "code": [
         "INIT A",
-        "PUSHENV 2",
+        "PUSHENV 0",
         {
-            "description": "Literal probably_married(X, Y)",
-            "description_node": "probably_married(X, Y)",
+            "description": "Literal p()",
+            "description_node": "p()",
             "code": [
                 "MARK B",
-                {
-                    "description": "Variable X",
-                    "description_node": "X",
-                    "code": [
-                        "PUTVAR 2"
-                    ]
-                },
-                {
-                    "description": "Variable Y",
-                    "description_node": "Y",
-                    "code": [
-                        "PUTVAR 1"
-                    ]
-                },
-                "CALL probably_married/2",
+                "CALL p/0",
                 "JUMP_TARGET B"
             ]
         },
-        "HALT 2",
+        "HALT 0",
         "JUMP_TARGET A",
         "NO",
         {
-            "description": "Predicate person/1",
-            "description_node": "person(X) :- X = manuel\nperson(X) :- X = simone\nperson(X) :- X = evi\nperson(X) :- X = elias\nperson(X) :- X = hannes\nperson(X) :- X = irmgard\nperson(X) :- X = elmar\nperson(X) :- X = elisabeth\nperson(X) :- X = oswald\nperson(X) :- X = maria\nperson(X) :- X = peter\nperson(X) :- X = frida\nperson(X) :- X = hansl",
+            "description": "Predicate t/1",
+            "description_node": "t(X) :- X = b",
             "code": [
-                "JUMP_TARGET person/1",
+                "JUMP_TARGET t/1",
+                {
+                    "description": "Clause",
+                    "description_node": "t(X) :- X = b",
+                    "code": [
+                        "PUSHENV 1",
+                        {
+                            "description": "Unification",
+                            "description_node": "X = b",
+                            "code": [
+                                "PUTREF 1",
+                                {
+                                    "description": "CodeU Atom b",
+                                    "description_node": "b",
+                                    "code": [
+                                        "UATOM b"
+                                    ]
+                                }
+                            ]
+                        },
+                        "POPENV"
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "Predicate p/0",
+            "description_node": "p() :- q(X), t(X)",
+            "code": [
+                "JUMP_TARGET p/0",
+                {
+                    "description": "Clause",
+                    "description_node": "p() :- q(X), t(X)",
+                    "code": [
+                        "PUSHENV 1",
+                        {
+                            "description": "Literal q(X)",
+                            "description_node": "q(X)",
+                            "code": [
+                                "MARK C",
+                                {
+                                    "description": "Variable X",
+                                    "description_node": "X",
+                                    "code": [
+                                        "PUTVAR 1"
+                                    ]
+                                },
+                                "CALL q/1",
+                                "JUMP_TARGET C"
+                            ]
+                        },
+                        {
+                            "description": "Literal t(X)",
+                            "description_node": "t(X)",
+                            "code": [
+                                "MARK D",
+                                {
+                                    "description": "InitializedVariable X",
+                                    "description_node": "X",
+                                    "code": [
+                                        "PUTREF 1"
+                                    ]
+                                },
+                                "CALL t/1",
+                                "JUMP_TARGET D"
+                            ]
+                        },
+                        "POPENV"
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "Predicate q/1",
+            "description_node": "q(X) :- s(X)",
+            "code": [
+                "JUMP_TARGET q/1",
+                {
+                    "description": "Clause",
+                    "description_node": "q(X) :- s(X)",
+                    "code": [
+                        "PUSHENV 1",
+                        {
+                            "description": "Literal s(X)",
+                            "description_node": "s(X)",
+                            "code": [
+                                "MARK E",
+                                {
+                                    "description": "InitializedVariable X",
+                                    "description_node": "X",
+                                    "code": [
+                                        "PUTREF 1"
+                                    ]
+                                },
+                                "CALL s/1",
+                                "JUMP_TARGET E"
+                            ]
+                        },
+                        "POPENV"
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "Predicate s/1",
+            "description_node": "s(X) :- t(X)\ns(X) :- X = a",
+            "code": [
+                "JUMP_TARGET s/1",
                 "SETBTP",
-                "TRY C",
-                "TRY D",
-                "TRY E",
                 "TRY F",
-                "TRY G",
-                "TRY H",
-                "TRY I",
-                "TRY J",
-                "TRY K",
-                "TRY L",
-                "TRY M",
-                "TRY N",
                 "DELBTP",
-                "JUMP O",
-                "JUMP_TARGET C",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = manuel",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = manuel",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom manuel",
-                                    "description_node": "manuel",
-                                    "code": [
-                                        "UATOM manuel"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET D",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = simone",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = simone",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom simone",
-                                    "description_node": "simone",
-                                    "code": [
-                                        "UATOM simone"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET E",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = evi",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = evi",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom evi",
-                                    "description_node": "evi",
-                                    "code": [
-                                        "UATOM evi"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
+                "JUMP G",
                 "JUMP_TARGET F",
                 {
                     "description": "Clause",
-                    "description_node": "person(X) :- X = elias",
+                    "description_node": "s(X) :- t(X)",
                     "code": [
                         "PUSHENV 1",
                         {
-                            "description": "Unification",
-                            "description_node": "X = elias",
+                            "description": "Literal t(X)",
+                            "description_node": "t(X)",
                             "code": [
-                                "PUTREF 1",
+                                "MARK H",
                                 {
-                                    "description": "CodeU Atom elias",
-                                    "description_node": "elias",
+                                    "description": "InitializedVariable X",
+                                    "description_node": "X",
                                     "code": [
-                                        "UATOM elias"
+                                        "PUTREF 1"
                                     ]
-                                }
+                                },
+                                "CALL t/1",
+                                "JUMP_TARGET H"
                             ]
                         },
                         "POPENV"
@@ -145,1225 +160,21 @@
                 "JUMP_TARGET G",
                 {
                     "description": "Clause",
-                    "description_node": "person(X) :- X = hannes",
+                    "description_node": "s(X) :- X = a",
                     "code": [
                         "PUSHENV 1",
                         {
                             "description": "Unification",
-                            "description_node": "X = hannes",
+                            "description_node": "X = a",
                             "code": [
                                 "PUTREF 1",
                                 {
-                                    "description": "CodeU Atom hannes",
-                                    "description_node": "hannes",
+                                    "description": "CodeU Atom a",
+                                    "description_node": "a",
                                     "code": [
-                                        "UATOM hannes"
+                                        "UATOM a"
                                     ]
                                 }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET H",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = irmgard",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = irmgard",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom irmgard",
-                                    "description_node": "irmgard",
-                                    "code": [
-                                        "UATOM irmgard"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET I",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = elmar",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = elmar",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom elmar",
-                                    "description_node": "elmar",
-                                    "code": [
-                                        "UATOM elmar"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET J",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = elisabeth",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = elisabeth",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom elisabeth",
-                                    "description_node": "elisabeth",
-                                    "code": [
-                                        "UATOM elisabeth"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET K",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = oswald",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = oswald",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom oswald",
-                                    "description_node": "oswald",
-                                    "code": [
-                                        "UATOM oswald"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET L",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = maria",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = maria",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom maria",
-                                    "description_node": "maria",
-                                    "code": [
-                                        "UATOM maria"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET M",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = peter",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = peter",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom peter",
-                                    "description_node": "peter",
-                                    "code": [
-                                        "UATOM peter"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET N",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = frida",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = frida",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom frida",
-                                    "description_node": "frida",
-                                    "code": [
-                                        "UATOM frida"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET O",
-                {
-                    "description": "Clause",
-                    "description_node": "person(X) :- X = hansl",
-                    "code": [
-                        "PUSHENV 1",
-                        {
-                            "description": "Unification",
-                            "description_node": "X = hansl",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom hansl",
-                                    "description_node": "hansl",
-                                    "code": [
-                                        "UATOM hansl"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                }
-            ]
-        },
-        {
-            "description": "Predicate is_child/2",
-            "description_node": "is_child(C, P) :- C = manuel, P = irmgard\nis_child(C, P) :- C = manuel, P = elmar\nis_child(C, P) :- C = simone, P = irmgard\nis_child(C, P) :- C = simone, P = elmar\nis_child(C, P) :- C = evi, P = elisabeth\nis_child(C, P) :- C = evi, P = oswald\nis_child(C, P) :- C = elias, P = elisabeth\nis_child(C, P) :- C = elias, P = oswald\nis_child(C, P) :- C = hannes, P = elisabeth\nis_child(C, P) :- C = hannes, P = oswald\nis_child(C, P) :- C = irmgard, P = maria\nis_child(C, P) :- C = irmgard, P = peter\nis_child(C, P) :- C = elmar, P = frida\nis_child(C, P) :- C = elmar, P = hansl\nis_child(C, P) :- C = oswald, P = frida\nis_child(C, P) :- C = oswald, P = hansl",
-            "code": [
-                "JUMP_TARGET is_child/2",
-                "SETBTP",
-                "TRY P",
-                "TRY Q",
-                "TRY R",
-                "TRY S",
-                "TRY T",
-                "TRY U",
-                "TRY V",
-                "TRY W",
-                "TRY X",
-                "TRY Y",
-                "TRY Z",
-                "TRY AA",
-                "TRY AB",
-                "TRY AC",
-                "TRY AD",
-                "DELBTP",
-                "JUMP AE",
-                "JUMP_TARGET P",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = manuel, P = irmgard",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = manuel",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom manuel",
-                                    "description_node": "manuel",
-                                    "code": [
-                                        "UATOM manuel"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = irmgard",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom irmgard",
-                                    "description_node": "irmgard",
-                                    "code": [
-                                        "UATOM irmgard"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET Q",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = manuel, P = elmar",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = manuel",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom manuel",
-                                    "description_node": "manuel",
-                                    "code": [
-                                        "UATOM manuel"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = elmar",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom elmar",
-                                    "description_node": "elmar",
-                                    "code": [
-                                        "UATOM elmar"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET R",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = simone, P = irmgard",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = simone",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom simone",
-                                    "description_node": "simone",
-                                    "code": [
-                                        "UATOM simone"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = irmgard",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom irmgard",
-                                    "description_node": "irmgard",
-                                    "code": [
-                                        "UATOM irmgard"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET S",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = simone, P = elmar",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = simone",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom simone",
-                                    "description_node": "simone",
-                                    "code": [
-                                        "UATOM simone"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = elmar",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom elmar",
-                                    "description_node": "elmar",
-                                    "code": [
-                                        "UATOM elmar"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET T",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = evi, P = elisabeth",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = evi",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom evi",
-                                    "description_node": "evi",
-                                    "code": [
-                                        "UATOM evi"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = elisabeth",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom elisabeth",
-                                    "description_node": "elisabeth",
-                                    "code": [
-                                        "UATOM elisabeth"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET U",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = evi, P = oswald",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = evi",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom evi",
-                                    "description_node": "evi",
-                                    "code": [
-                                        "UATOM evi"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = oswald",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom oswald",
-                                    "description_node": "oswald",
-                                    "code": [
-                                        "UATOM oswald"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET V",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = elias, P = elisabeth",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = elias",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom elias",
-                                    "description_node": "elias",
-                                    "code": [
-                                        "UATOM elias"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = elisabeth",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom elisabeth",
-                                    "description_node": "elisabeth",
-                                    "code": [
-                                        "UATOM elisabeth"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET W",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = elias, P = oswald",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = elias",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom elias",
-                                    "description_node": "elias",
-                                    "code": [
-                                        "UATOM elias"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = oswald",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom oswald",
-                                    "description_node": "oswald",
-                                    "code": [
-                                        "UATOM oswald"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET X",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = hannes, P = elisabeth",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = hannes",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom hannes",
-                                    "description_node": "hannes",
-                                    "code": [
-                                        "UATOM hannes"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = elisabeth",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom elisabeth",
-                                    "description_node": "elisabeth",
-                                    "code": [
-                                        "UATOM elisabeth"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET Y",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = hannes, P = oswald",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = hannes",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom hannes",
-                                    "description_node": "hannes",
-                                    "code": [
-                                        "UATOM hannes"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = oswald",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom oswald",
-                                    "description_node": "oswald",
-                                    "code": [
-                                        "UATOM oswald"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET Z",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = irmgard, P = maria",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = irmgard",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom irmgard",
-                                    "description_node": "irmgard",
-                                    "code": [
-                                        "UATOM irmgard"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = maria",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom maria",
-                                    "description_node": "maria",
-                                    "code": [
-                                        "UATOM maria"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET AA",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = irmgard, P = peter",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = irmgard",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom irmgard",
-                                    "description_node": "irmgard",
-                                    "code": [
-                                        "UATOM irmgard"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = peter",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom peter",
-                                    "description_node": "peter",
-                                    "code": [
-                                        "UATOM peter"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET AB",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = elmar, P = frida",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = elmar",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom elmar",
-                                    "description_node": "elmar",
-                                    "code": [
-                                        "UATOM elmar"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = frida",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom frida",
-                                    "description_node": "frida",
-                                    "code": [
-                                        "UATOM frida"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET AC",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = elmar, P = hansl",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = elmar",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom elmar",
-                                    "description_node": "elmar",
-                                    "code": [
-                                        "UATOM elmar"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = hansl",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom hansl",
-                                    "description_node": "hansl",
-                                    "code": [
-                                        "UATOM hansl"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET AD",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = oswald, P = frida",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = oswald",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom oswald",
-                                    "description_node": "oswald",
-                                    "code": [
-                                        "UATOM oswald"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = frida",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom frida",
-                                    "description_node": "frida",
-                                    "code": [
-                                        "UATOM frida"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET AE",
-                {
-                    "description": "Clause",
-                    "description_node": "is_child(C, P) :- C = oswald, P = hansl",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Unification",
-                            "description_node": "C = oswald",
-                            "code": [
-                                "PUTREF 1",
-                                {
-                                    "description": "CodeU Atom oswald",
-                                    "description_node": "oswald",
-                                    "code": [
-                                        "UATOM oswald"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "description": "Unification",
-                            "description_node": "P = hansl",
-                            "code": [
-                                "PUTREF 2",
-                                {
-                                    "description": "CodeU Atom hansl",
-                                    "description_node": "hansl",
-                                    "code": [
-                                        "UATOM hansl"
-                                    ]
-                                }
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                }
-            ]
-        },
-        {
-            "description": "Predicate sibling/2",
-            "description_node": "sibling(X, Y) :- is_child(X, P), is_child(Y, P)",
-            "code": [
-                "JUMP_TARGET sibling/2",
-                {
-                    "description": "Clause",
-                    "description_node": "sibling(X, Y) :- is_child(X, P), is_child(Y, P)",
-                    "code": [
-                        "PUSHENV 3",
-                        {
-                            "description": "Literal is_child(X, P)",
-                            "description_node": "is_child(X, P)",
-                            "code": [
-                                "MARK AF",
-                                {
-                                    "description": "InitializedVariable X",
-                                    "description_node": "X",
-                                    "code": [
-                                        "PUTREF 1"
-                                    ]
-                                },
-                                {
-                                    "description": "Variable P",
-                                    "description_node": "P",
-                                    "code": [
-                                        "PUTVAR 3"
-                                    ]
-                                },
-                                "CALL is_child/2",
-                                "JUMP_TARGET AF"
-                            ]
-                        },
-                        {
-                            "description": "Literal is_child(Y, P)",
-                            "description_node": "is_child(Y, P)",
-                            "code": [
-                                "MARK AG",
-                                {
-                                    "description": "InitializedVariable Y",
-                                    "description_node": "Y",
-                                    "code": [
-                                        "PUTREF 2"
-                                    ]
-                                },
-                                {
-                                    "description": "InitializedVariable P",
-                                    "description_node": "P",
-                                    "code": [
-                                        "PUTREF 3"
-                                    ]
-                                },
-                                "CALL is_child/2",
-                                "JUMP_TARGET AG"
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                }
-            ]
-        },
-        {
-            "description": "Predicate grandson/2",
-            "description_node": "grandson(X, Y) :- is_child(X, P), is_child(P, Y)",
-            "code": [
-                "JUMP_TARGET grandson/2",
-                {
-                    "description": "Clause",
-                    "description_node": "grandson(X, Y) :- is_child(X, P), is_child(P, Y)",
-                    "code": [
-                        "PUSHENV 3",
-                        {
-                            "description": "Literal is_child(X, P)",
-                            "description_node": "is_child(X, P)",
-                            "code": [
-                                "MARK AH",
-                                {
-                                    "description": "InitializedVariable X",
-                                    "description_node": "X",
-                                    "code": [
-                                        "PUTREF 1"
-                                    ]
-                                },
-                                {
-                                    "description": "Variable P",
-                                    "description_node": "P",
-                                    "code": [
-                                        "PUTVAR 3"
-                                    ]
-                                },
-                                "CALL is_child/2",
-                                "JUMP_TARGET AH"
-                            ]
-                        },
-                        {
-                            "description": "Literal is_child(P, Y)",
-                            "description_node": "is_child(P, Y)",
-                            "code": [
-                                "MARK AI",
-                                {
-                                    "description": "InitializedVariable P",
-                                    "description_node": "P",
-                                    "code": [
-                                        "PUTREF 3"
-                                    ]
-                                },
-                                {
-                                    "description": "InitializedVariable Y",
-                                    "description_node": "Y",
-                                    "code": [
-                                        "PUTREF 2"
-                                    ]
-                                },
-                                "CALL is_child/2",
-                                "JUMP_TARGET AI"
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                }
-            ]
-        },
-        {
-            "description": "Predicate ancestor/2",
-            "description_node": "ancestor(X, Y) :- is_child(Y, X)\nancestor(X, Y) :- is_child(Y, Z), ancestor(X, Z)",
-            "code": [
-                "JUMP_TARGET ancestor/2",
-                "SETBTP",
-                "TRY AJ",
-                "DELBTP",
-                "JUMP AK",
-                "JUMP_TARGET AJ",
-                {
-                    "description": "Clause",
-                    "description_node": "ancestor(X, Y) :- is_child(Y, X)",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Literal is_child(Y, X)",
-                            "description_node": "is_child(Y, X)",
-                            "code": [
-                                "MARK AL",
-                                {
-                                    "description": "InitializedVariable Y",
-                                    "description_node": "Y",
-                                    "code": [
-                                        "PUTREF 2"
-                                    ]
-                                },
-                                {
-                                    "description": "InitializedVariable X",
-                                    "description_node": "X",
-                                    "code": [
-                                        "PUTREF 1"
-                                    ]
-                                },
-                                "CALL is_child/2",
-                                "JUMP_TARGET AL"
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                },
-                "JUMP_TARGET AK",
-                {
-                    "description": "Clause",
-                    "description_node": "ancestor(X, Y) :- is_child(Y, Z), ancestor(X, Z)",
-                    "code": [
-                        "PUSHENV 3",
-                        {
-                            "description": "Literal is_child(Y, Z)",
-                            "description_node": "is_child(Y, Z)",
-                            "code": [
-                                "MARK AM",
-                                {
-                                    "description": "InitializedVariable Y",
-                                    "description_node": "Y",
-                                    "code": [
-                                        "PUTREF 2"
-                                    ]
-                                },
-                                {
-                                    "description": "Variable Z",
-                                    "description_node": "Z",
-                                    "code": [
-                                        "PUTVAR 3"
-                                    ]
-                                },
-                                "CALL is_child/2",
-                                "JUMP_TARGET AM"
-                            ]
-                        },
-                        {
-                            "description": "Literal ancestor(X, Z)",
-                            "description_node": "ancestor(X, Z)",
-                            "code": [
-                                "MARK AN",
-                                {
-                                    "description": "InitializedVariable X",
-                                    "description_node": "X",
-                                    "code": [
-                                        "PUTREF 1"
-                                    ]
-                                },
-                                {
-                                    "description": "InitializedVariable Z",
-                                    "description_node": "Z",
-                                    "code": [
-                                        "PUTREF 3"
-                                    ]
-                                },
-                                "CALL ancestor/2",
-                                "JUMP_TARGET AN"
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                }
-            ]
-        },
-        {
-            "description": "Predicate descendant/2",
-            "description_node": "descendant(X, Y) :- ancestor(Y, X)",
-            "code": [
-                "JUMP_TARGET descendant/2",
-                {
-                    "description": "Clause",
-                    "description_node": "descendant(X, Y) :- ancestor(Y, X)",
-                    "code": [
-                        "PUSHENV 2",
-                        {
-                            "description": "Literal ancestor(Y, X)",
-                            "description_node": "ancestor(Y, X)",
-                            "code": [
-                                "MARK AO",
-                                {
-                                    "description": "InitializedVariable Y",
-                                    "description_node": "Y",
-                                    "code": [
-                                        "PUTREF 2"
-                                    ]
-                                },
-                                {
-                                    "description": "InitializedVariable X",
-                                    "description_node": "X",
-                                    "code": [
-                                        "PUTREF 1"
-                                    ]
-                                },
-                                "CALL ancestor/2",
-                                "JUMP_TARGET AO"
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                }
-            ]
-        },
-        {
-            "description": "Predicate cousin/2",
-            "description_node": "cousin(X, Y) :- is_child(X, P), is_child(Y, Q), sibling(P, Q)",
-            "code": [
-                "JUMP_TARGET cousin/2",
-                {
-                    "description": "Clause",
-                    "description_node": "cousin(X, Y) :- is_child(X, P), is_child(Y, Q), sibling(P, Q)",
-                    "code": [
-                        "PUSHENV 4",
-                        {
-                            "description": "Literal is_child(X, P)",
-                            "description_node": "is_child(X, P)",
-                            "code": [
-                                "MARK AP",
-                                {
-                                    "description": "InitializedVariable X",
-                                    "description_node": "X",
-                                    "code": [
-                                        "PUTREF 1"
-                                    ]
-                                },
-                                {
-                                    "description": "Variable P",
-                                    "description_node": "P",
-                                    "code": [
-                                        "PUTVAR 3"
-                                    ]
-                                },
-                                "CALL is_child/2",
-                                "JUMP_TARGET AP"
-                            ]
-                        },
-                        {
-                            "description": "Literal is_child(Y, Q)",
-                            "description_node": "is_child(Y, Q)",
-                            "code": [
-                                "MARK AQ",
-                                {
-                                    "description": "InitializedVariable Y",
-                                    "description_node": "Y",
-                                    "code": [
-                                        "PUTREF 2"
-                                    ]
-                                },
-                                {
-                                    "description": "Variable Q",
-                                    "description_node": "Q",
-                                    "code": [
-                                        "PUTVAR 4"
-                                    ]
-                                },
-                                "CALL is_child/2",
-                                "JUMP_TARGET AQ"
-                            ]
-                        },
-                        {
-                            "description": "Literal sibling(P, Q)",
-                            "description_node": "sibling(P, Q)",
-                            "code": [
-                                "MARK AR",
-                                {
-                                    "description": "InitializedVariable P",
-                                    "description_node": "P",
-                                    "code": [
-                                        "PUTREF 3"
-                                    ]
-                                },
-                                {
-                                    "description": "InitializedVariable Q",
-                                    "description_node": "Q",
-                                    "code": [
-                                        "PUTREF 4"
-                                    ]
-                                },
-                                "CALL sibling/2",
-                                "JUMP_TARGET AR"
-                            ]
-                        },
-                        "POPENV"
-                    ]
-                }
-            ]
-        },
-        {
-            "description": "Predicate probably_married/2",
-            "description_node": "probably_married(X, Y) :- is_child(C, X), is_child(C, Y)",
-            "code": [
-                "JUMP_TARGET probably_married/2",
-                {
-                    "description": "Clause",
-                    "description_node": "probably_married(X, Y) :- is_child(C, X), is_child(C, Y)",
-                    "code": [
-                        "PUSHENV 3",
-                        {
-                            "description": "Literal is_child(C, X)",
-                            "description_node": "is_child(C, X)",
-                            "code": [
-                                "MARK AS",
-                                {
-                                    "description": "Variable C",
-                                    "description_node": "C",
-                                    "code": [
-                                        "PUTVAR 3"
-                                    ]
-                                },
-                                {
-                                    "description": "InitializedVariable X",
-                                    "description_node": "X",
-                                    "code": [
-                                        "PUTREF 1"
-                                    ]
-                                },
-                                "CALL is_child/2",
-                                "JUMP_TARGET AS"
-                            ]
-                        },
-                        {
-                            "description": "Literal is_child(C, Y)",
-                            "description_node": "is_child(C, Y)",
-                            "code": [
-                                "MARK AT",
-                                {
-                                    "description": "InitializedVariable C",
-                                    "description_node": "C",
-                                    "code": [
-                                        "PUTREF 3"
-                                    ]
-                                },
-                                {
-                                    "description": "InitializedVariable Y",
-                                    "description_node": "Y",
-                                    "code": [
-                                        "PUTREF 2"
-                                    ]
-                                },
-                                "CALL is_child/2",
-                                "JUMP_TARGET AT"
                             ]
                         },
                         "POPENV"

@@ -1,5 +1,5 @@
-from Nodes import * 
-from Instructions import Instructions0Params as I0P, Instructions1Params as I1P 
+from Nodes import *
+from Instructions import Instructions0Params as I0P, Instructions1Params as I1P
 from Interpreter import Interpreter
 
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
                            StatementSequence(
                                Assignment(Variable("int", "out"),
-                                          FunctionCall(Variable("*fac(int)", "fib"), [Number(4)])),
+                                          FunctionCall(Variable("*fac(int)", "fib"), [Number(2)])),
             Print(Variable("int", "out")),
             Assignment(Variable("int", "out"),
                                    BinaryOperation(
@@ -79,6 +79,6 @@ if __name__ == '__main__':
 
     print("Running...\n")
 
-    s.run(debug=False)
+    s.run(debug=True)
 
     print("Exit code: ", s.stack.stack[0], "\n")

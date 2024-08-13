@@ -54,6 +54,19 @@ if __name__ == '__main__':
 
     )
 
+    # expr = LetIn(
+    #     [(Variable("a"), BaseType(19)),
+    #         (Variable("b"),  BinaryOperation(
+    #             Variable("a"),
+    #             I0P.I.MUL,
+    #             Variable("a")
+    #         ))],
+    #     BinaryOperation(
+    #         Variable("a"),
+    #         I0P.I.ADD,
+    #         Variable("b")
+    #     ))
+
     variable_adress: dict[str, (chr, int)] = {
 
     }

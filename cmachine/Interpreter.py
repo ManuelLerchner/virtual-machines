@@ -1,13 +1,26 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, Optional
 from collections import defaultdict
 
-from Instructions import Instructions1Params
+from pyparsing import *
+
+from Instructions import Instructions1Params, bcolors
 
 if TYPE_CHECKING:
     from Instructions import Instructions
 
 from time import sleep
+
+
+def uncolor(str):
+    ESC = Literal('\x1b')
+    integer = Word(nums)
+    escapeSeq = Combine(ESC + '[' + Optional(delimitedList(integer, ';')) +
+                        oneOf(list(alphas)))
+
+    def nonAnsiString(s): return Suppress(escapeSeq).transformString(str)
+
+    return nonAnsiString(str)
 
 
 class Stack:
@@ -54,14 +67,18 @@ class Interpreter:
             IR = self.code[self.PC]
 
             self.PC += 1
-            IR.interpret(self)
 
             if debug:
-                sleep(0.1)
-                clear = '\33[2K'
-                print(f"\r{clear}", end="")
+
+                real_ir_length = len(uncolor(str(IR)))
+                registers = f"PC: {self.PC: > 5}, SP: {self.stack.SP: > 5}, FP: {self.stack.FP: > 5}"
+                print(f"Stack:\t{self.stack}")
                 print(
-                    f"IR: {str(IR):>15} PC: {self.PC:>5}, SP: {self.stack.SP:>5}, EP: {self.stack.EP:>5}, FP: {self.stack.FP:>5} Stack: {self.stack}", end="", flush=True)
+                    f"Instruction: {str(IR)+' ' * (18 - real_ir_length)} {bcolors.OKBLUE +str(IR.description()) + bcolors.ENDC}")
+                print(registers)
+                print()
+
+            IR.interpret(self)
 
             step += 1
 

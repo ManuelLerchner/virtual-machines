@@ -180,6 +180,62 @@ class Instructions0Params(Instructions):
         else:
             raise Exception("Unknown instruction")
 
+    def description(self):
+        if self.instruction == Instructions0Params.I.ADD:
+            return "Add the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.SUB:
+            return "Subtract the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.MUL:
+            return "Multiply the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.DIV:
+            return "Divide the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.LEQ:
+            return "Check if the second element is less than or equal to the topmost element"
+        elif self.instruction == Instructions0Params.I.GEQ:
+            return "Check if the second element is greater than or equal to the topmost element"
+        elif self.instruction == Instructions0Params.I.LT:
+            return "Check if the second element is less than the topmost element"
+        elif self.instruction == Instructions0Params.I.GT:
+            return "Check if the second element is greater than the topmost element"
+        elif self.instruction == Instructions0Params.I.EQ:
+            return "Check if the two topmost elements are equal"
+        elif self.instruction == Instructions0Params.I.NEG:
+            return "Make the topmost element negative"
+        elif self.instruction == Instructions0Params.I.NOT:
+            return "Negate the topmost element"
+        elif self.instruction == Instructions0Params.I.PRINT:
+            return "Print the topmost element"
+        elif self.instruction == Instructions0Params.I.GETBASIC:
+            return "Interpret the topmost element as address of a basic value in the heap, and load the value"
+        elif self.instruction == Instructions0Params.I.MKBASIC:
+            return "Interpret the topmost element as a basic value, and store it in the heap. Returns the address of the stored value"
+        elif self.instruction == Instructions0Params.I.EVAL:
+            return "Check if the topmost element is a closure, and if so, evaluate it. Otherwise, do nothing"
+        elif self.instruction == Instructions0Params.I.HALT:
+            return "Stop the program"
+        elif self.instruction == Instructions0Params.I.APPLY:
+            return "Interpret the topmost element as a Function. Update PC and GP stored in the function. Coppy all arguments from the heap to the stack"
+        elif self.instruction == Instructions0Params.I.MKVEC0:
+            return "Copies the elements above the frame pointer to a new vector in the heap, returns the address of the vector"
+        elif self.instruction == Instructions0Params.I.WRAP:
+            return "Creates a new function in the heap. The function has the current PC-1 as code pointer, the topmost element as argument pointer, and the current GP as global pointer"
+        elif self.instruction == Instructions0Params.I.POPENV:
+            return "Restores the global pointer, program counter and frame pointer from the stack. Save the topmost element and pop the remaining stack frame"
+        elif self.instruction == Instructions0Params.I.MARK0:
+            return "Save the current global pointer, frame pointer and program counter on top of the stack. (Contrary to MARK, this instructionsaves the PC on the stack)"
+        elif self.instruction == Instructions0Params.I.APPLY0:
+            return "Interpret the topmost element as a closure. Update GP and PC accordingly and jump to the closure entry point"
+        elif self.instruction == Instructions0Params.I.UPDATE:
+            return "Restore the global pointer, program counter and frame pointer from the stack. Rewrite the closure pointer in the stack, with the calculated value on top of the stack"
+        elif self.instruction == Instructions0Params.I.COPYGLOB:
+            return "Place the current global pointer on top of the stack"
+        elif self.instruction == Instructions0Params.I.NIL:
+            return "Create a new empty list in the heap, and push the address of the list onto the stack"
+        elif self.instruction == Instructions0Params.I.CONS:
+            return "Create a new cons cell in the heap. Expects Head and Tail on the stack. Returns the address of the new cons cell"
+        else:
+            raise Exception("Unknown instruction")
+
 
 class Instructions1Params(Instructions):
 
@@ -310,3 +366,43 @@ class Instructions1Params(Instructions):
                 state.PC = self.param1
         else:
             raise Exception("Unknown instruction" + str(self.instruction))
+
+    def description(self):
+        if self.instruction == Instructions1Params.I.LOADC:
+            return f"Load constant {self.param1} onto the stack"
+        elif self.instruction == Instructions1Params.I.JUMP:
+            return f"Jump to instruction {self.param1}"
+        elif self.instruction == Instructions1Params.I.JUMPZ:
+            return f"Jump to instruction {self.param1} if the topmost element is zero"
+        elif self.instruction == Instructions1Params.I.JUMP_TARGET:
+            return f""
+        elif self.instruction == Instructions1Params.I.PUSHLOC:
+            return f"Copies the {self.param1}th element below the SP to the top of the stack"
+        elif self.instruction == Instructions1Params.I.PUSHGLOB:
+            return f"Push the {self.param1}th element from the global pointer onto the stack"
+        elif self.instruction == Instructions1Params.I.SLIDE:
+            return f"Saves the topmost element, and removes the remaining {self.param1}-1 elements from the stack"
+        elif self.instruction == Instructions1Params.I.MKVEC:
+            return f"Copy the topmost {self.param1} elements to a new vector in the heap, and push the address of the vector onto the stack"
+        elif self.instruction == Instructions1Params.I.MKFUNVAL:
+            return f"Create a new function in the heap. The function has the parameter {self.param1} as code pointer, an empty vector as argument pointer, and the topmost element of the stack as global pointer"
+        elif self.instruction == Instructions1Params.I.TARG:
+            return f"Check if there are at least {self.param1} elements above the frame pointer. If not, there is under supply, and a new function with partial arguments is created. Otherwise, do nothing"
+        elif self.instruction == Instructions1Params.I.RETURN:
+            return f"If all {self.param1} arguments are on the stack are consumed, pop the stack frame. Otherwise, the another function (the return of the expression) must be applied"
+        elif self.instruction == Instructions1Params.I.MARK:
+            return f"Save the current global pointer, frame pointer and return address {self.param1} on top of the stack"
+        elif self.instruction == Instructions1Params.I.ALLOC:
+            return f"Allocate {self.param1} new dummy objects on the heap. Copy the addresses of the new objects to the stack"
+        elif self.instruction == Instructions1Params.I.REWRITE:
+            return f"Rewrite the adress {self.param1} elements below the top of the stack with the topmost element"
+        elif self.instruction == Instructions1Params.I.MKCLOS:
+            return f"Create a new closure in the heap. The closure has the topmost element as global pointer, and {self.param1} as code pointer"
+        elif self.instruction == Instructions1Params.I.GET:
+            return f"Interpret the topmost element as a vector in the heap, and copy the {self.param1}th element of the vector onto the stack"
+        elif self.instruction == Instructions1Params.I.GETVEC:
+            return f"Interpret the topmost element as a vector in the heap, and copy all elements of the vector onto the stack"
+        elif self.instruction == Instructions1Params.I.TLIST:
+            return f"Interpret the topmost element as a list in the heap. If the list is empty, pop the stack frame. Otherwise, copy the head and tail of the list to the stack. Afterwards jump to instruction {self.param1}"
+        else:
+            raise Exception("Unknown instruction")

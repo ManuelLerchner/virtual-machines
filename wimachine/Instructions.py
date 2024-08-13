@@ -47,12 +47,33 @@ class Instructions0Params(Instructions):
         SETBTP = "SETBTP"
         DELBTP = "DELBTP"
         NO = "NO"
+        PRUNE = "PRUNE"
 
     def __init__(self, instruction: I):
         self.instruction = instruction
 
     def __repr__(self):
         return f"{bcolors.OKYELLOW+self.instruction.value+bcolors.ENDC}"
+
+    def description(self):
+        if self.instruction == Instructions0Params.I.PUTANON:
+            return "Puts a new unbound variable on the stack. Returns the address of the new variable"
+        elif self.instruction == Instructions0Params.I.BIND:
+            return "Binds the unbound variable below the top of the stack to the top of the stack. Removes the two variables from the stack"
+        elif self.instruction == Instructions0Params.I.UNIFY:
+            return "Calls the unify() function with the top two elements of the stack. Removes the two elements from the stack"
+        elif self.instruction == Instructions0Params.I.POP:
+            return "Pops the top element of the stack"
+        elif self.instruction == Instructions0Params.I.POPENV:
+            return "Sets the PC to the positive continuation and the FP to the old FP and tries to pop the stack frame, if no backtrackpoint is above the current FP"
+        elif self.instruction == Instructions0Params.I.SETBTP:
+            return "Save the HPold, TPOld, BPOld on the stack and set the BP to the FP"
+        elif self.instruction == Instructions0Params.I.DELBTP:
+            return "Set the BP to the saved BPOld"
+        elif self.instruction == Instructions0Params.I.NO:
+            return "Prints 'No' and sets the PC to the end of the code"
+        elif self.instruction == Instructions0Params.I.PRUNE:
+            return "Sets the BP to the saved BPOld"
 
     def interpret(self, state: Interpreter):
         S = state.stack
@@ -90,6 +111,8 @@ class Instructions0Params(Instructions):
         elif self.instruction == Instructions0Params.I.NO:
             print("No")
             state.PC = len(state.code) + 1
+        elif self.instruction == Instructions0Params.I.PRUNE:
+            state.BP = BPOld(S, state.FP)
         else:
             raise Exception("Unknown instruction")
 
@@ -124,6 +147,44 @@ class Instructions1Params(Instructions):
 
     def __repr__(self):
         return f"{bcolors.OKCYAN+self.instruction.value+bcolors.ENDC} {bcolors.OKGREEN+str(self.param1)+bcolors.ENDC}" + (f" {bcolors.OKGREEN+str(self.param2)+bcolors.ENDC}" if self.param2 is not None else "")
+
+    def description(self):
+        if self.instruction == Instructions1Params.I.PUTATOM:
+            return f"Puts the atom {self.param1} on the heap and the address on the stack"
+        elif self.instruction == Instructions1Params.I.PUTREF:
+            return f"Puts the dereferenced address of the variable at position {self.param1} on the stack"
+        elif self.instruction == Instructions1Params.I.PUTVAR:
+            return f"Puts a new variable on the heap and the address on the stack. The variable is at position {self.param1}"
+        elif self.instruction == Instructions1Params.I.PUTSTRUCT:
+            return f"Puts the structure {self.param1} on the heap and the address on the stack"
+        elif self.instruction == Instructions1Params.I.UATOM:
+            return f"Unifies the top of the stack with the atom {self.param1}"
+        elif self.instruction == Instructions1Params.I.UVAR:
+            return f"Unifies the variable at position {self.param1} with the top of the stack"
+        elif self.instruction == Instructions1Params.I.UREF:
+            return f"Unifies the top of the stack with the dereferenced variable at position {self.param1}"
+        elif self.instruction == Instructions1Params.I.USTRUCT:
+            return f"Unifies the top of the stack with the structure {self.param1}"
+        elif self.instruction == Instructions1Params.I.SON:
+            return f"Pushes the {self.param1}th  element of the structure on the stack"
+        elif self.instruction == Instructions1Params.I.UP:
+            return f"Pops the top of the stack and sets the PC to the label {self.param1}"
+        elif self.instruction == Instructions1Params.I.JUMP:
+            return f"Sets the PC to the label {self.param1}"
+        elif self.instruction == Instructions1Params.I.JUMP_TARGET:
+            return f"Label {self.param1}"
+        elif self.instruction == Instructions1Params.I.MARK:
+            return f"Allocates space for 6 elements on the stack and sets the FP to the top of the stack"
+        elif self.instruction == Instructions1Params.I.CALL:
+            return f"Calls the predicate {self.param1}, sets the FP down to the number of arguments and sets the PC to the label of the predicate"
+        elif self.instruction == Instructions1Params.I.CHECK:
+            return f"Checks wheter the top of the stack occurs inside the term bound to the variable at position {self.param1}"
+        elif self.instruction == Instructions1Params.I.PUSHENV:
+            return f"Sets the SP to the FP + {self.param1}"
+        elif self.instruction == Instructions1Params.I.TRY:
+            return f"Sets the negative continuation to the current PC and and jumps to the label {self.param1}"
+        elif self.instruction == Instructions1Params.I.INIT:
+            return f"Initializes the stack and the heap with [FailAddr={self.param1}, BPOld=-1, TPOld=-1, HPold=0, FPOld=_, _]"
 
     def interpret(self, state: Interpreter):
         S = state.stack

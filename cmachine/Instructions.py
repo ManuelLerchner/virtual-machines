@@ -136,6 +136,50 @@ class Instructions0Params(Instructions):
         else:
             raise Exception("Unknown instruction")
 
+    def description(self):
+        if self.instruction == Instructions0Params.I.ADD:
+            return "Adds the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.SUB:
+            return "Subtracts the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.MUL:
+            return "Multiplies the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.DIV:
+            return "Divides the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.LEQ:
+            return "Compares the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.GEQ:
+            return "Compares the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.LT:
+            return "Compares the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.GT:
+            return "Compares the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.EQ:
+            return "Compares the two topmost elements of the stack"
+        elif self.instruction == Instructions0Params.I.NEG:
+            return "Negatives the topmost element of the stack"
+        elif self.instruction == Instructions0Params.I.NOT:
+            return "Negates the topmost element of the stack"
+        elif self.instruction == Instructions0Params.I.LOAD:
+            return "Interprets the topmost element of the stack as an address and loads the value at that address"
+        elif self.instruction == Instructions0Params.I.STORE:
+            return "Stores the second topmost element of the stack at the address given by the topmost element of the stack"
+        elif self.instruction == Instructions0Params.I.POP:
+            return "Pops the topmost element of the stack"
+        elif self.instruction == Instructions0Params.I.PRINT:
+            return "Prints the topmost element of the stack"
+        elif self.instruction == Instructions0Params.I.NEW:
+            return "Allocates a new memory block of the size given by the topmost element of the stack. Returns the address of the block"
+        elif self.instruction == Instructions0Params.I.MARK:
+            return "Saves FP and EP on the stack. This is used to mark the beginning of a new stack frame"
+        elif self.instruction == Instructions0Params.I.CALL:
+            return "Exchange the current PC with the topmost element (the address of the function to call). Sets the FP to the start of the current stack frame"
+        elif self.instruction == Instructions0Params.I.RETURN:
+            return "Pops the stackframe by restoring the [PC_old, FP_old, EP_old] at the base of the current stack frame"
+        elif self.instruction == Instructions0Params.I.HALT:
+            return "Halts the program"
+        else:
+            return "Unknown instruction"
+
 
 class Instructions1Params(Instructions):
 
@@ -188,3 +232,23 @@ class Instructions1Params(Instructions):
             S[S.SP] = tmp
         else:
             raise Exception("Unknown instruction")
+
+    def description(self):
+        if self.instruction == Instructions1Params.I.LOADC:
+            return "Loads the value given by the parameter onto the stack"
+        elif self.instruction == Instructions1Params.I.LOADRC:
+            return "Loads the relative address FP + param1 onto the stack"
+        elif self.instruction == Instructions1Params.I.JUMP:
+            return "Sets the PC to the value given by the parameter"
+        elif self.instruction == Instructions1Params.I.JUMPZ:
+            return "Sets the PC to the value given by the parameter if the topmost element of the stack is 0. Pops the stack"
+        elif self.instruction == Instructions1Params.I.JUMP_TARGET:
+            return "-"
+        elif self.instruction == Instructions1Params.I.ALLOC:
+            return "Allocates param1 memory cells on the stack. Returns the address of the first cell"
+        elif self.instruction == Instructions1Params.I.ENTER:
+            return "Sets the EXTREME POINTER to SP + param1. Limting the stack to param1 elements"
+        elif self.instruction == Instructions1Params.I.SLIDE:
+            return "Copies the topmost element (the return value) down param1 elements on the stack. This eliminiates formal parameters"
+        else:
+            return "Unknown instruction"
